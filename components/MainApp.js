@@ -158,24 +158,39 @@ export default function MainApp() {
     };
 
     // Funkcja usuwania wydarzenia z bazy Supabase
-    const handleDelete = async (id) => {
-        const confirmed = window.confirm('Czy na pewno chcesz usunąć to wydarzenie?');
-        if (!confirmed) return;
+    // Przykład w miejscu obsługi usuwania (np. handleDelete)
+    const handleDeleteEvent = async (eventItem) => {
+        // 1. Usunięcie z bazy Supabase
+        const { error } = await supabase
+            .from('events')
+            .delete()
+            .eq('id', eventItem.id);
 
-        try {
-            const { error } = await supabase.from('visits').delete().eq('id', id);
-            if (error) throw error;
-
-            // Jeśli usunięte wydarzenie było otwarte w podglądzie dnia, zaktualizuj podgląd
-            if (selectedDayVisits) {
-                setSelectedDayVisits(selectedDayVisits.filter(v => v.id !== id));
-            }
-
-            fetchVisits(); // Odśwież listę
-        } catch (err) {
-            console.error('Błąd usuwania:', err);
-            alert('Nie udało się usunąć wydarzenia: ' + err.message);
+        if (error) {
+            console.error('Błąd usuwania:', error.message);
+            return;
         }
+
+        // 2. Wysłanie e-maila o usunięciu
+        try {
+            await fetch('/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    doctor: eventItem.doctor,
+                    memberName: eventItem.memberName,
+                    date: eventItem.date,
+                    time: eventItem.time,
+                    location: eventItem.location,
+                    type: 'delete' // Informacja dla API, że to usunięcie
+                })
+            });
+        } catch (mailError) {
+            console.error('Nie udało się wysłać powiadomienia e-mail:', mailError);
+        }
+
+        // 3. Odświeżenie listy na froncie
+        fetchEvents();
     };
 
     // Logika Kalendarza
