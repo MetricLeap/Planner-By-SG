@@ -585,14 +585,27 @@ export default function MainApp() {
                                 <input type="number" step="0.01" value={formData.cost} onChange={e => setFormData({ ...formData, cost: e.target.value })} style={{ fontSize: '0.85rem', padding: '8px' }} />
                             </div>
 
-                            <div className="input-group span-2">
-                                <label style={{ fontSize: '0.75rem' }}>Komentarz / Notatka</label>
+                            {/* Poprawione, wycentrowane i dopasowane pole notatki */}
+                            <div className="input-group span-2" style={{ display: 'flex', flexDirection: 'column', width: '110%', margin: '0 auto', boxSizing: 'border-box' }}>
+                                <label style={{ fontSize: '0.75rem', marginBottom: '4px' }}>Komentarz / Notatka</label>
                                 <textarea
-                                    rows="2"
+                                    rows="3"
                                     placeholder="Dodatkowe informacje..."
                                     value={formData.notes}
                                     onChange={e => setFormData({ ...formData, notes: e.target.value })}
-                                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px', color: 'inherit', resize: 'vertical', fontSize: '0.85rem' }}
+                                    style={{
+                                        width: '100%',
+                                        background: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        borderRadius: '8px',
+                                        padding: '10px',
+                                        color: 'inherit',
+                                        resize: 'vertical',
+                                        fontSize: '0.85rem',
+                                        boxSizing: 'border-box',
+                                        outline: 'none',
+                                        fontFamily: 'inherit'
+                                    }}
                                 />
                             </div>
                         </div>
@@ -652,7 +665,7 @@ export default function MainApp() {
                                         </span>
                                     </div>
 
-                                    {/* Środkowa sekcja: lokalizacja, telefon */}
+                                    {/* Środkowá sekcja: lokalizacja, telefon */}
                                     <div className="appointment-details" style={{ fontSize: '0.8rem', marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                         {item.location && (
                                             <div className="detail-line" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
