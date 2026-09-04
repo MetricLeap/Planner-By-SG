@@ -846,3 +846,62 @@ select:focus {
     transform: translateY(0);
   }
 }
+
+/* Ukrywanie przycisków w nagłówku na telefonie */
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+
+  .app-shell {
+    padding-bottom: 80px !important;
+    /* Miejsce na dolny pasek */
+  }
+}
+
+/* Ukrywanie nawigacji dolnej na komputerach */
+.mobile-bottom-nav {
+  display: none;
+}
+
+/* Pasek nawigacyjny na dole telefonu */
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 65px;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+    padding: 0 10px;
+  }
+
+  .mobile-nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 0.75rem;
+    gap: 2px;
+    cursor: pointer;
+  }
+
+  .mobile-nav-btn.primary {
+    background: #2563eb;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-top: -25px;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+  }
+}

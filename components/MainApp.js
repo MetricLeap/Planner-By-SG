@@ -437,6 +437,21 @@ export default function MainApp() {
                     </div>
                 )}
             </section>
+
+            {/* PRZYPIĘTE MENU DOLNE DLA MOBILES */}
+            <nav className="mobile-bottom-nav">
+                <button className="mobile-nav-btn" onClick={() => setCalendarVisible(!calendarVisible)}>
+                    <span className="material-symbols-outlined">calendar_month</span>
+                    <span>Kalendarz</span>
+                </button>
+                <button className="mobile-nav-btn primary" onClick={openFormForAdd}>
+                    <span className="material-symbols-outlined">add</span>
+                </button>
+                <button className="mobile-nav-btn" onClick={() => supabase.auth.signOut()}>
+                    <span className="material-symbols-outlined">logout</span>
+                    <span>Wyloguj</span>
+                </button>
+            </nav>
         </div>
     );
 }
