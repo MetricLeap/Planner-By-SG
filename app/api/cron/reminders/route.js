@@ -4,11 +4,11 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const memberNames = {
-    mom: 'Mama',
-    dad: 'Tata',
-    child1: 'Córka 1',
-    child2: 'Córka 2',
-    all: 'Cała rodzina'
+    mom: 'Nataliia',
+    dad: 'Sebastian',
+    child1: 'Kamila',
+    child2: 'Emilia',
+    all: 'Wszyscy'
 };
 
 export async function GET(request) {
@@ -18,11 +18,11 @@ export async function GET(request) {
         tomorrow.setDate(tomorrow.getDate() + 1);
         const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
-        // Pobranie wizyt zaplanowanych na jutro
+        // Pobranie wizyt zaplanowanych na jutro (uwzględnia też wydarzenia wielodniowe trwające jutro)
         const { data: visits, error } = await supabase
             .from('visits')
             .select('*')
-            .eq('date', tomorrowStr);
+            .or(`date.eq.${tomorrowStr},and(is_multi_day.eq.true,date.lte.${tomorrowStr},end_date.gte.${tomorrowStr})`);
 
         if (error) throw error;
 
