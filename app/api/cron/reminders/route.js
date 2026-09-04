@@ -36,7 +36,7 @@ export async function GET(request) {
 
             await resend.emails.send({
                 from: 'Planner By SG <onboarding@resend.dev>',
-                to: ['metricleapp@gmail.com'], // Podmień na właściwy e-mail
+                to: ['s.gasior97@gmail.com', 'natkatatsenko@gmail.com'],
                 subject: `[PRZYPOMNIENIE] Jutrzejsza wizyta: ${visit.doctor}`,
                 html: `
           <div style="font-family: sans-serif; padding: 20px; color: #333;">

@@ -16,7 +16,7 @@ export async function POST(req) {
 
         const data = await resend.emails.send({
             from: 'Planner By SG<powiadomienia@plannerbysg.pl>',
-            to: ['s.gasior97@gmail.com'], // Zmień na swój adres docelowy
+            to: ['s.gasior97@gmail.com', 'natkatatsenko@gmail.com'],
             subject: subject,
             html: `
         <div style="font-family: sans-serif; padding: 20px; line-height: 1.5;">
@@ -29,6 +29,8 @@ export async function POST(req) {
             <li><strong>Miejsce:</strong> ${location || 'Nie podano'}</li>
             ${!isDelete ? `<li><strong>Koszt:</strong> ${costDisplay}</li>` : ''}
           </ul>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+            <p style="font-size: 12px; color: #666;">Powiadomienie z cyklicznego automatycznego systemu Planner By SG.</p>
         </div>
       `,
         });
