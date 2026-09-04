@@ -185,7 +185,6 @@ export default function MainApp() {
                 const { error } = await supabase.from('visits').update(payload).eq('id', editId);
                 if (error) throw error;
 
-                // DODANE: Wysyłanie e-maila również po edycji
                 fetch('/api/send-email', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -196,7 +195,7 @@ export default function MainApp() {
                         time: payload.time,
                         location: payload.location,
                         cost: payload.cost,
-                        type: 'update' // Opcjonalnie do rozróżnienia w szablonie, jeśli chcesz
+                        type: 'update'
                     }),
                 }).catch((err) => console.error('Błąd wysyłania e-maila po edycji:', err));
 
@@ -330,6 +329,13 @@ export default function MainApp() {
                     <button className="btn-app btn-primary" onClick={openFormForAdd}>
                         <span className="material-symbols-outlined">add</span>
                         <span>Nowe wydarzenie</span>
+                    </button>
+                    <button
+                        className="btn-app btn-secondary"
+                        onClick={() => { fetchVisits(); fetchPlaces(); }}
+                        title="Odśwież dane"
+                    >
+                        <span className="material-symbols-outlined">refresh</span>
                     </button>
                     <button className="btn-app btn-secondary" onClick={() => supabase.auth.signOut()}>
                         <span className="material-symbols-outlined">logout</span>
@@ -683,6 +689,10 @@ export default function MainApp() {
                 </button>
                 <button className="mobile-nav-btn primary" onClick={openFormForAdd}>
                     <span className="material-symbols-outlined">add</span>
+                </button>
+                <button className="mobile-nav-btn" onClick={() => { fetchVisits(); fetchPlaces(); }} title="Odśwież">
+                    <span className="material-symbols-outlined">refresh</span>
+                    <span>Odśwież</span>
                 </button>
                 <button className="mobile-nav-btn" onClick={() => supabase.auth.signOut()}>
                     <span className="material-symbols-outlined">logout</span>
