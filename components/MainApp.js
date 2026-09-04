@@ -24,7 +24,7 @@ export default function MainApp() {
     const [savedPlaces, setSavedPlaces] = useState([]);
     const [isPlacesModalOpen, setIsPlacesModalOpen] = useState(false);
     const [newPlace, setNewPlace] = useState({ name: '', address: '', phone: '' });
-    const [editPlaceId, setEditPlaceId] = useState(null); // Stan edycji miejsca
+    const [editPlaceId, setEditPlaceId] = useState(null);
 
     // Stan filtrowania po uzytkowniku
     const [selectedMemberFilter, setSelectedMemberFilter] = useState(null);
@@ -89,7 +89,6 @@ export default function MainApp() {
         if (!newPlace.name) return;
 
         if (editPlaceId) {
-            // Edycja istniejącego miejsca
             const { error } = await supabase.from('saved_places').update(newPlace).eq('id', editPlaceId);
             if (error) {
                 alert('Błąd aktualizacji miejsca: ' + error.message);
@@ -99,7 +98,6 @@ export default function MainApp() {
                 fetchPlaces();
             }
         } else {
-            // Dodawanie nowego miejsca
             const { error } = await supabase.from('saved_places').insert([newPlace]);
             if (error) {
                 alert('Błąd zapisu miejsca: ' + error.message);
@@ -110,13 +108,11 @@ export default function MainApp() {
         }
     };
 
-    // Wczytanie miejsca do edycji
     const handleEditPlaceClick = (p) => {
         setEditPlaceId(p.id);
         setNewPlace({ name: p.name, address: p.address || '', phone: p.phone || '' });
     };
 
-    // Usuwanie miejsca z bazy
     const handleDeletePlace = async (id) => {
         const { error } = await supabase.from('saved_places').delete().eq('id', id);
         if (error) {
@@ -130,7 +126,6 @@ export default function MainApp() {
         }
     };
 
-    // Automatyczne uzupełnianie danych po wybraniu miejsca z listy
     const handleSelectPlaceChange = (e) => {
         const selectedName = e.target.value;
         if (!selectedName) {
@@ -619,8 +614,26 @@ export default function MainApp() {
                                     <span className={`badge-tag ${item.member_key}`}>{memberNames[item.member_key]}</span>
                                     <h4>{item.doctor}</h4>
                                     <div className="appointment-details">
-                                        {item.location && <div className="detail-line"><span className="material-symbols-outlined">location_on</span> <strong>{item.location}</strong></div>}
-                                        {item.phone && <div className="detail-line"><span className="material-symbols-outlined">call</span> <a href={`tel:${item.phone}`} className="phone-link">{item.phone}</a></div>}
+                                        {item.location && (
+                                            <div className="detail-line">
+                                                <span className="material-symbols-outlined">location_on</span>
+                                                <a
+                                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{ color: 'inherit', textDecoration: 'underline', cursor: 'pointer' }}
+                                                    title="Otwórz w Mapach Google"
+                                                >
+                                                    <strong>{item.location}</strong>
+                                                </a>
+                                            </div>
+                                        )}
+                                        {item.phone && (
+                                            <div className="detail-line">
+                                                <span className="material-symbols-outlined">call</span>
+                                                <a href={`tel:${item.phone}`} className="phone-link">{item.phone}</a>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="appointment-meta">
