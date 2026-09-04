@@ -20,6 +20,9 @@ export default function MainApp() {
     const [visits, setVisits] = useState([]);
     const [loadingVisits, setLoadingVisits] = useState(true);
 
+    // Stan filtrowania po uzytkowniku
+    const [selectedMemberFilter, setSelectedMemberFilter] = useState(null);
+
     // Stan Kalendarza
     const [calendarVisible, setCalendarVisible] = useState(false);
     const [currentDate, setCurrentDate] = useState(new Date(2026, 8, 1));
@@ -63,6 +66,20 @@ export default function MainApp() {
     useEffect(() => {
         fetchVisits();
     }, []);
+
+    // Obsługa kliknięcia w kafelek członka rodziny
+    const handleMemberCardClick = (key) => {
+        if (selectedMemberFilter === key) {
+            setSelectedMemberFilter(null); // drugie kliknięcie - resetujemy filtr
+        } else {
+            setSelectedMemberFilter(key); // pierwsze kliknięcie - filtrujemy po wybranym
+        }
+    };
+
+    // Przefiltrowana lista wizyt na podstawie wybranego kafelka
+    const filteredVisits = selectedMemberFilter
+        ? visits.filter(v => v.member_key === selectedMemberFilter)
+        : visits;
 
     // Obsługa formularza (dodawanie / edycja)
     const handleFormSubmit = async (e) => {
@@ -161,7 +178,7 @@ export default function MainApp() {
         setEditId(null);
     };
 
-    // Funkcja usuwania wydarzenia z bazy Supabase (przyjmuje cały obiekt item)
+    // Funkcja usuwania wydarzenia z bazy Supabase
     const handleDelete = async (item) => {
         const confirmed = window.confirm('Czy na pewno chcesz usunąć to wydarzenie?');
         if (!confirmed) return;
@@ -188,7 +205,6 @@ export default function MainApp() {
                 .then(data => console.log('Odpowiedź Resend (usuwanie):', data))
                 .catch(err => console.error('Błąd wysyłania e-maila o usunięciu:', err));
 
-            // Jeśli usunięte wydarzenie było otwarte w podglądzie dnia, zaktualizuj podgląd
             if (selectedDayVisits) {
                 setSelectedDayVisits(selectedDayVisits.filter(v => v.id !== item.id));
             }
@@ -243,17 +259,25 @@ export default function MainApp() {
 
             {/* FAMILY GRID */}
             <section className="family-grid">
-                {['mom', 'dad', 'child1', 'child2'].map((key) => (
-                    <div key={key} className={`member-card ${key}`}>
-                        <div className="member-avatar">{key === 'mom' ? 'M' : key === 'dad' ? 'T' : key === 'child1' ? 'C1' : 'C2'}</div>
-                        <div className="member-info">
-                            <span className="member-name">{memberNames[key]}</span>
-                            <span className="member-status">
-                                {visits.filter(v => v.member_key === key).length} zaplanowanych
-                            </span>
+                {['mom', 'dad', 'child1', 'child2'].map((key) => {
+                    const isSelected = selectedMemberFilter === key;
+                    return (
+                        <div
+                            key={key}
+                            className={`member-card ${key} ${isSelected ? 'selected' : ''}`}
+                            onClick={() => handleMemberCardClick(key)}
+                            style={{ cursor: 'pointer', border: isSelected ? '2px solid var(--primary, #3b82f6)' : undefined }}
+                        >
+                            <div className="member-avatar">{key === 'mom' ? 'M' : key === 'dad' ? 'T' : key === 'child1' ? 'C1' : 'C2'}</div>
+                            <div className="member-info">
+                                <span className="member-name">{memberNames[key]}</span>
+                                <span className="member-status">
+                                    {visits.filter(v => v.member_key === key).length} zaplanowanych
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </section>
 
             {/* KALENDARZ */}
@@ -294,7 +318,7 @@ export default function MainApp() {
                             {Array.from({ length: daysInMonth }).map((_, i) => {
                                 const day = i + 1;
                                 const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                                const visitsForDay = visits.filter(v => v.is_multi_day ? (formattedDate >= v.date && formattedDate <= v.end_date) : v.date === formattedDate);
+                                const visitsForDay = filteredVisits.filter(v => v.is_multi_day ? (formattedDate >= v.date && formattedDate <= v.end_date) : v.date === formattedDate);
 
                                 return (
                                     <div key={day} className="cal-day-cell" onClick={() => handleDayClick(day, visitsForDay)}>
@@ -423,17 +447,29 @@ export default function MainApp() {
 
             {/* TIMELINE LIST */}
             <section className="timeline-section">
-                <div className="section-title-bar">
-                    <h2>Nadchodzące wydarzenia i wizyty</h2>
+                <div className="section-title-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h2>
+                        {selectedMemberFilter
+                            ? `Wydarzenia: ${memberNames[selectedMemberFilter]}`
+                            : 'Nadchodzące wydarzenia i wizyty'}
+                    </h2>
+                    {selectedMemberFilter && (
+                        <button
+                            onClick={() => setSelectedMemberFilter(null)}
+                            style={{ background: 'none', border: 'none', color: 'var(--primary, #3b82f6)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500 }}
+                        >
+                            Pokaż wszystkich
+                        </button>
+                    )}
                 </div>
 
                 {loadingVisits ? (
                     <p>Wczytywanie wydarzeń z bazy danych...</p>
-                ) : visits.length === 0 ? (
+                ) : filteredVisits.length === 0 ? (
                     <p style={{ color: 'var(--text-muted)' }}>Brak zaplanowanych wydarzeń. Dodaj pierwsze!</p>
                 ) : (
                     <div className="timeline-list">
-                        {visits.map((item) => (
+                        {filteredVisits.map((item) => (
                             <div key={item.id} className={`appointment-card tag-${item.member_key}`}>
                                 <div className="appointment-time-badge">
                                     <span className="time-hour">{item.is_multi_day ? 'Wielodniowe' : item.time}</span>
