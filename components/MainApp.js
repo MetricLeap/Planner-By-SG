@@ -53,7 +53,7 @@ export default function MainApp() {
         city: '',
         phone: '',
         cost: '',
-        notes: '' // Pole komentarza
+        notes: ''
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -179,7 +179,7 @@ export default function MainApp() {
             street: formData.street || '',
             phone: formData.phone || '',
             cost: parseFloat(formData.cost) || 0,
-            notes: formData.notes || '' // Zapis komentarza
+            notes: formData.notes || ''
         };
 
         try {
@@ -276,7 +276,7 @@ export default function MainApp() {
             city: item.city || '',
             phone: item.phone || '',
             cost: item.cost || '',
-            notes: item.notes || '' // Odczyt komentarza
+            notes: item.notes || ''
         });
         setIsFormOpen(true);
     };
@@ -531,11 +531,9 @@ export default function MainApp() {
                                                         </button>
                                                     </div>
                                                 </div>
-                                                {v.notes && (
-                                                    <div style={{ marginTop: '6px', fontSize: '0.75rem', color: 'var(--text-muted, #94a3b8)', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '4px' }}>
-                                                        💬 {v.notes}
-                                                    </div>
-                                                )}
+                                                <div style={{ marginTop: '6px', fontSize: '0.75rem', color: v.notes ? 'var(--text-muted, #94a3b8)' : 'rgba(148, 163, 184, 0.4)', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '4px', fontStyle: v.notes ? 'normal' : 'italic' }}>
+                                                    {v.notes ? `💬 ${v.notes}` : 'Brak notatek'}
+                                                </div>
                                             </div>
                                         ))
                                     )}
@@ -682,7 +680,7 @@ export default function MainApp() {
                     <div className="timeline-list">
                         {filteredVisits.map((item) => (
                             <div key={item.id} className={`appointment-card tag-${item.member_key}`} style={{ display: 'flex', flexDirection: 'column' }}>
-                                <div style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
+                                <div className="appointment-card-row" style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
                                     <div className="appointment-time-badge">
                                         <span className="time-hour">{item.is_multi_day ? 'Wielodniowe' : item.time}</span>
                                         <span className="time-date">{item.date}</span>
@@ -727,13 +725,10 @@ export default function MainApp() {
                                         </div>
                                     </div>
                                 </div>
-                                {/* Wyświetlanie komentarza na dole karty, jeśli istnieje */}
-                                {item.notes && (
-                                    <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.08)', fontSize: '0.85rem', color: 'var(--text-muted, #94a3b8)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>comment</span>
-                                        <span>{item.notes}</span>
-                                    </div>
-                                )}
+                                <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.08)', fontSize: '0.85rem', color: item.notes ? 'var(--text-muted, #94a3b8)' : 'rgba(148, 163, 184, 0.4)', display: 'flex', alignItems: 'center', gap: '6px', fontStyle: item.notes ? 'normal' : 'italic' }}>
+                                    <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>comment</span>
+                                    <span>{item.notes ? item.notes : 'Brak notatek'}</span>
+                                </div>
                             </div>
                         ))}
                     </div>
