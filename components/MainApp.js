@@ -184,6 +184,22 @@ export default function MainApp() {
             if (editId) {
                 const { error } = await supabase.from('visits').update(payload).eq('id', editId);
                 if (error) throw error;
+
+                // DODANE: Wysyłanie e-maila również po edycji
+                fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        doctor: payload.doctor,
+                        memberName: memberNames[payload.member_key],
+                        date: payload.date,
+                        time: payload.time,
+                        location: payload.location,
+                        cost: payload.cost,
+                        type: 'update' // Opcjonalnie do rozróżnienia w szablonie, jeśli chcesz
+                    }),
+                }).catch((err) => console.error('Błąd wysyłania e-maila po edycji:', err));
+
             } else {
                 const { error } = await supabase.from('visits').insert([payload]);
                 if (error) throw error;
