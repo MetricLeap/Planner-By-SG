@@ -45,22 +45,8 @@ export default function MainApp() {
         cost: ''
     });
 
-    // 1. Dodaj stan ładowania na początku komponentu formularza
+    // Stan ładowania formularza
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsSubmitting(true); // Włączamy ładowanie
-
-        try {
-            // ... Twój dotychczasowy kod zapisu do Supabase i wysyłki e-maila ...
-
-        } catch (error) {
-            console.error('Błąd:', error);
-        } finally {
-            setIsSubmitting(false); // Wyłączamy ładowanie bez względu na sukces/błąd
-        }
-    };
 
     // Fetch danych z Supabase
     const fetchVisits = async () => {
@@ -81,6 +67,7 @@ export default function MainApp() {
     // Obsługa formularza (dodawanie / edycja)
     const handleFormSubmit = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true);
 
         let dateVal = formData.date;
         let timeVal = '00:00';
@@ -111,10 +98,8 @@ export default function MainApp() {
             } else {
                 const { error } = await supabase.from('visits').insert([payload]);
                 if (error) throw error;
-            }
 
-            // Wywołanie API do wysyłki e-maila po dodaniu nowego wpisu
-            if (!editId) {
+                // Wywołanie API do wysyłki e-maila po dodaniu nowego wpisu
                 fetch('/api/send-email', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -124,7 +109,7 @@ export default function MainApp() {
                         date: payload.date,
                         time: payload.time,
                         location: payload.location,
-                        cost: payload.cost, // <-- Dodana kwota
+                        cost: payload.cost,
                     }),
                 })
                     .then(res => res.json())
@@ -137,6 +122,8 @@ export default function MainApp() {
         } catch (err) {
             console.error('Błąd Supabase:', err);
             alert('Błąd zapisu: ' + err.message);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -174,8 +161,7 @@ export default function MainApp() {
         setEditId(null);
     };
 
-    // Funkcja usuwania wydarzenia z bazy Supabase
-    // Przykład w miejscu obsługi usuwania (np. handleDelete)
+    // Funkcja usuwania wydarzenia z bazy Supabase (przyjmuje cały obiekt item)
     const handleDelete = async (item) => {
         const confirmed = window.confirm('Czy na pewno chcesz usunąć to wydarzenie?');
         if (!confirmed) return;
@@ -191,11 +177,11 @@ export default function MainApp() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     doctor: item.doctor,
-                    memberName: memberNames[item.member_key], // Przekształcamy klucz na pełne imię
+                    memberName: memberNames[item.member_key],
                     date: item.date,
                     time: item.time,
                     location: item.location,
-                    type: 'delete' // Kluczowy znacznik dla API
+                    type: 'delete'
                 }),
             })
                 .then(res => res.json())
@@ -207,7 +193,7 @@ export default function MainApp() {
                 setSelectedDayVisits(selectedDayVisits.filter(v => v.id !== item.id));
             }
 
-            fetchVisits(); // Odśwież listę
+            fetchVisits();
         } catch (err) {
             console.error('Błąd usuwania:', err);
             alert('Nie udało się usunąć wydarzenia: ' + err.message);
@@ -342,7 +328,7 @@ export default function MainApp() {
                                                     <button className="action-icon-btn" onClick={() => openFormForEdit(v)}>
                                                         <span className="material-symbols-outlined">edit</span>
                                                     </button>
-                                                    <button className="action-icon-btn" onClick={() => handleDelete(v.id)} style={{ color: '#ef4444' }}>
+                                                    <button className="action-icon-btn" onClick={() => handleDelete(v)} style={{ color: '#ef4444' }}>
                                                         <span className="material-symbols-outlined">delete</span>
                                                     </button>
                                                 </div>
@@ -469,7 +455,7 @@ export default function MainApp() {
                                         <button className="action-icon-btn" onClick={() => openFormForEdit(item)} title="Edytuj">
                                             <span className="material-symbols-outlined">edit</span>
                                         </button>
-                                        <button className="action-icon-btn" onClick={() => handleDelete(item.id)} title="Usuń" style={{ color: '#ef4444' }}>
+                                        <button className="action-icon-btn" onClick={() => handleDelete(item)} title="Usuń" style={{ color: '#ef4444' }}>
                                             <span className="material-symbols-outlined">delete</span>
                                         </button>
                                     </div>
