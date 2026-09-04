@@ -20,6 +20,11 @@ export default function MainApp() {
     const [visits, setVisits] = useState([]);
     const [loadingVisits, setLoadingVisits] = useState(true);
 
+    // Stan miejsc (baza użytkownika)
+    const [savedPlaces, setSavedPlaces] = useState([]);
+    const [isPlacesModalOpen, setIsPlacesModalOpen] = useState(false);
+    const [newPlace, setNewPlace] = useState({ name: '', address: '', phone: '' });
+
     // Stan filtrowania po uzytkowniku
     const [selectedMemberFilter, setSelectedMemberFilter] = useState(null);
 
@@ -48,10 +53,9 @@ export default function MainApp() {
         cost: ''
     });
 
-    // Stan ładowania formularza
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Fetch danych z Supabase
+    // Fetch danych wizyt
     const fetchVisits = async () => {
         setLoadingVisits(true);
         const { data, error } = await supabase.from('visits').select('*').order('date', { ascending: true });
@@ -63,25 +67,74 @@ export default function MainApp() {
         setLoadingVisits(false);
     };
 
-    useEffect(() => {
-        fetchVisits();
-    }, []);
-
-    // Obsługa kliknięcia w kafelek członka rodziny
-    const handleMemberCardClick = (key) => {
-        if (selectedMemberFilter === key) {
-            setSelectedMemberFilter(null); // drugie kliknięcie - resetujemy filtr
+    // Fetch zapisanych miejsc
+    const fetchPlaces = async () => {
+        const { data, error } = await supabase.from('saved_places').select('*').order('name', { ascending: true });
+        if (error) {
+            console.error('Błąd pobierania miejsc:', error);
         } else {
-            setSelectedMemberFilter(key); // pierwsze kliknięcie - filtrujemy po wybranym
+            setSavedPlaces(data || []);
         }
     };
 
-    // Przefiltrowana lista wizyt na podstawie wybranego kafelka
+    useEffect(() => {
+        fetchVisits();
+        fetchPlaces();
+    }, []);
+
+    // Dodawanie nowego miejsca do bazy
+    const handleAddPlace = async (e) => {
+        e.preventDefault();
+        if (!newPlace.name) return;
+
+        const { error } = await supabase.from('saved_places').insert([newPlace]);
+        if (error) {
+            alert('Błąd zapisu miejsca: ' + error.message);
+        } else {
+            setNewPlace({ name: '', address: '', phone: '' });
+            fetchPlaces();
+        }
+    };
+
+    // Usuwanie miejsca z bazy
+    const handleDeletePlace = async (id) => {
+        const { error } = await supabase.from('saved_places').delete().eq('id', id);
+        if (error) {
+            alert('Błąd usuwania miejsca: ' + error.message);
+        } else {
+            fetchPlaces();
+        }
+    };
+
+    // Automatyczne uzupełnianie danych po wybraniu miejsca z listy
+    const handleSelectPlaceChange = (e) => {
+        const selectedName = e.target.value;
+        if (!selectedName) {
+            setFormData({ ...formData, location: '', phone: '' });
+            return;
+        }
+        const found = savedPlaces.find(p => p.name === selectedName);
+        if (found) {
+            setFormData({
+                ...formData,
+                location: found.name + (found.address ? ` (${found.address})` : ''),
+                phone: found.phone || formData.phone
+            });
+        }
+    };
+
+    const handleMemberCardClick = (key) => {
+        if (selectedMemberFilter === key) {
+            setSelectedMemberFilter(null);
+        } else {
+            setSelectedMemberFilter(key);
+        }
+    };
+
     const filteredVisits = selectedMemberFilter
         ? visits.filter(v => v.member_key === selectedMemberFilter)
         : visits;
 
-    // Obsługa formularza (dodawanie / edycja)
     const handleFormSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -116,7 +169,6 @@ export default function MainApp() {
                 const { error } = await supabase.from('visits').insert([payload]);
                 if (error) throw error;
 
-                // Wywołanie API do wysyłki e-maila po dodaniu nowego wpisu
                 fetch('/api/send-email', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -128,10 +180,7 @@ export default function MainApp() {
                         location: payload.location,
                         cost: payload.cost,
                     }),
-                })
-                    .then(res => res.json())
-                    .then(data => console.log('Odpowiedź z Resend:', data))
-                    .catch((err) => console.error('Błąd wysyłania e-maila:', err));
+                }).catch((err) => console.error('Błąd wysyłania e-maila:', err));
             }
 
             closeForm();
@@ -178,17 +227,14 @@ export default function MainApp() {
         setEditId(null);
     };
 
-    // Funkcja usuwania wydarzenia z bazy Supabase
     const handleDelete = async (item) => {
         const confirmed = window.confirm('Czy na pewno chcesz usunąć to wydarzenie?');
         if (!confirmed) return;
 
         try {
-            // 1. Usunięcie z bazy Supabase
             const { error } = await supabase.from('visits').delete().eq('id', item.id);
             if (error) throw error;
 
-            // 2. Wysłanie powiadomienia e-mail o usunięciu
             fetch('/api/send-email', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -200,10 +246,7 @@ export default function MainApp() {
                     location: item.location,
                     type: 'delete'
                 }),
-            })
-                .then(res => res.json())
-                .then(data => console.log('Odpowiedź Resend (usuwanie):', data))
-                .catch(err => console.error('Błąd wysyłania e-maila o usunięciu:', err));
+            }).catch(err => console.error(err));
 
             if (selectedDayVisits) {
                 setSelectedDayVisits(selectedDayVisits.filter(v => v.id !== item.id));
@@ -211,12 +254,10 @@ export default function MainApp() {
 
             fetchVisits();
         } catch (err) {
-            console.error('Błąd usuwania:', err);
             alert('Nie udało się usunąć wydarzenia: ' + err.message);
         }
     };
 
-    // Logika Kalendarza
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
     const firstDayIndex = (new Date(year, month, 1).getDay() + 6) % 7;
@@ -247,6 +288,11 @@ export default function MainApp() {
                         <span className="material-symbols-outlined">calendar_month</span>
                         <span>Kalendarz</span>
                     </button>
+                    {/* NOWY PRZYCISK: Miejsca */}
+                    <button className="btn-app btn-secondary" onClick={() => setIsPlacesModalOpen(true)}>
+                        <span className="material-symbols-outlined">place</span>
+                        <span>Miejsca</span>
+                    </button>
                     <button className="btn-app btn-primary" onClick={openFormForAdd}>
                         <span className="material-symbols-outlined">add</span>
                         <span>Nowe wydarzenie</span>
@@ -256,6 +302,54 @@ export default function MainApp() {
                     </button>
                 </div>
             </header>
+
+            {/* MODAL ZARZĄDZANIA MIEJSCAMI */}
+            {isPlacesModalOpen && (
+                <div className="form-drawer open" style={{ zIndex: 1100 }}>
+                    <div className="glass-card form-card" style={{ maxWidth: '500px' }}>
+                        <div className="form-card-header">
+                            <h3>Moje zapisane miejsca</h3>
+                            <button type="button" className="icon-btn-close" onClick={() => setIsPlacesModalOpen(false)}>&times;</button>
+                        </div>
+                        <div style={{ marginBottom: '20px' }}>
+                            <form onSubmit={handleAddPlace} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <div className="input-group">
+                                    <label>Nazwa placówki / gabinetu</label>
+                                    <input type="text" required placeholder="np. LuxMed / Przychodnia" value={newPlace.name} onChange={e => setNewPlace({ ...newPlace, name: e.target.value })} />
+                                </div>
+                                <div className="input-group">
+                                    <label>Adres</label>
+                                    <input type="text" placeholder="np. ul. Długa 5, Bielsko-Biała" value={newPlace.address} onChange={e => setNewPlace({ ...newPlace, address: e.target.value })} />
+                                </div>
+                                <div className="input-group">
+                                    <label>Numer telefonu</label>
+                                    <input type="tel" placeholder="np. 33 123 45 67" value={newPlace.phone} onChange={e => setNewPlace({ ...newPlace, phone: e.target.value })} />
+                                </div>
+                                <button type="submit" className="btn-app btn-primary" style={{ marginTop: '5px' }}>Dodaj miejsce</button>
+                            </form>
+                        </div>
+
+                        <div className="schedule-items-list" style={{ maxHeight: '250px', overflowY: 'auto' }}>
+                            <h4 style={{ fontSize: '0.9rem', marginBottom: '10px', color: 'var(--text-muted)' }}>Lista zapisanych miejsc:</h4>
+                            {savedPlaces.length === 0 ? (
+                                <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Brak zapisanych miejsc.</p>
+                            ) : (
+                                savedPlaces.map(p => (
+                                    <div key={p.id} className="schedule-item" style={{ alignItems: 'flex-start' }}>
+                                        <div>
+                                            <strong>{p.name}</strong>
+                                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{p.address} {p.phone ? `• Tel: ${p.phone}` : ''}</div>
+                                        </div>
+                                        <button className="action-icon-btn" onClick={() => handleDeletePlace(p.id)} style={{ color: '#ef4444' }}>
+                                            <span className="material-symbols-outlined">delete</span>
+                                        </button>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* FAMILY GRID */}
             <section className="family-grid">
@@ -329,7 +423,6 @@ export default function MainApp() {
                             })}
                         </div>
 
-                        {/* PANEL DNIOWY */}
                         {selectedDayVisits && (
                             <div className="day-schedule-panel">
                                 <div className="schedule-header">
@@ -376,7 +469,7 @@ export default function MainApp() {
                     <form className="app-form" onSubmit={handleFormSubmit}>
                         <div className="form-grid">
                             <div className="input-group">
-                                <label>Uczestnik</label>
+                                <label>Uczestnik / Pacjent</label>
                                 <select value={formData.memberKey} onChange={e => setFormData({ ...formData, memberKey: e.target.value })}>
                                     <option value="mom">Nataliia</option>
                                     <option value="dad">Sebastian</option>
@@ -416,9 +509,20 @@ export default function MainApp() {
                                 </>
                             )}
 
+                            {/* WYBÓR Z ZAPISANYCH MIEJSC LUB WPISZ RĘCZNIE */}
+                            <div className="input-group span-2">
+                                <label>Wybierz zapisane miejsce (lub wpisz poniżej)</label>
+                                <select onChange={handleSelectPlaceChange} defaultValue="" style={{ marginBottom: '8px' }}>
+                                    <option value="">-- Wybierz z listy zapisanych miejsc --</option>
+                                    {savedPlaces.map(p => (
+                                        <option key={p.id} value={p.name}>{p.name} ({p.address})</option>
+                                    ))}
+                                </select>
+                            </div>
+
                             <div className="input-group span-2">
                                 <label>Miejsce i adres</label>
-                                <input type="text" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} />
+                                <input type="text" placeholder="np. Gabinet, ul. Przykładowa 1" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} />
                             </div>
                             <div className="input-group">
                                 <label>Telefon</label>
@@ -451,7 +555,7 @@ export default function MainApp() {
                     <h2>
                         {selectedMemberFilter
                             ? `Wydarzenia: ${memberNames[selectedMemberFilter]}`
-                            : 'Nadchodzące wydarzenia'}
+                            : 'Nadchodzące wydarzenia i wizyty'}
                     </h2>
                     {selectedMemberFilter && (
                         <button
@@ -469,35 +573,7 @@ export default function MainApp() {
                     <p style={{ color: 'var(--text-muted)' }}>Brak zaplanowanych wydarzeń. Dodaj pierwsze!</p>
                 ) : (
                     <div className="timeline-list">
-                        {filteredVisits.Item ? filteredVisits.map((item) => (
-                            <div key={item.id} className={`appointment-card tag-${item.member_key}`}>
-                                <div className="appointment-time-badge">
-                                    <span className="time-hour">{item.is_multi_day ? 'Wielodniowe' : item.time}</span>
-                                    <span className="time-date">{item.date}</span>
-                                </div>
-                                <div className="appointment-main">
-                                    <span className={`badge-tag ${item.member_key}`}>{memberNames[item.member_key]}</span>
-                                    <h4>{item.doctor}</h4>
-                                    <div className="appointment-details">
-                                        {item.location && <div className="detail-line"><span className="material-symbols-outlined">location_on</span> <strong>{item.location}</strong></div>}
-                                        {item.phone && <div className="detail-line"><span className="material-symbols-outlined">call</span> <a href={`tel:${item.phone}`} className="phone-link">{item.phone}</a></div>}
-                                    </div>
-                                </div>
-                                <div className="appointment-meta">
-                                    <span className={`cost-price ${!item.cost ? 'free' : ''}`}>
-                                        {!item.cost || item.cost === 0 ? '0 zł' : `${item.cost} zł`}
-                                    </span>
-                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                        <button className="action-icon-btn" onClick={() => openFormForEdit(item)} title="Edytuj">
-                                            <span className="material-symbols-outlined">edit</span>
-                                        </button>
-                                        <button className="action-icon-btn" onClick={() => handleDelete(item)} title="Usuń" style={{ color: '#ef4444' }}>
-                                            <span className="material-symbols-outlined">delete</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )) : filteredVisits.map((item) => (
+                        {filteredVisits.map((item) => (
                             <div key={item.id} className={`appointment-card tag-${item.member_key}`}>
                                 <div className="appointment-time-badge">
                                     <span className="time-hour">{item.is_multi_day ? 'Wielodniowe' : item.time}</span>
@@ -535,6 +611,10 @@ export default function MainApp() {
                 <button className="mobile-nav-btn" onClick={() => setCalendarVisible(!calendarVisible)}>
                     <span className="material-symbols-outlined">calendar_month</span>
                     <span>Kalendarz</span>
+                </button>
+                <button className="mobile-nav-btn" onClick={() => setIsPlacesModalOpen(true)}>
+                    <span className="material-symbols-outlined">place</span>
+                    <span>Miejsca</span>
                 </button>
                 <button className="mobile-nav-btn primary" onClick={openFormForAdd}>
                     <span className="material-symbols-outlined">add</span>
