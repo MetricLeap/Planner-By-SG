@@ -159,38 +159,42 @@ export default function MainApp() {
 
     // Funkcja usuwania wydarzenia z bazy Supabase
     // Przykład w miejscu obsługi usuwania (np. handleDelete)
-    const handleDelete = async (eventItem) => {
-        // 1. Usunięcie z bazy Supabase
-        const { error } = await supabase
-            .from('events')
-            .delete()
-            .eq('id', eventItem.id);
+    const handleDelete = async (item) => {
+        const confirmed = window.confirm('Czy na pewno chcesz usunąć to wydarzenie?');
+        if (!confirmed) return;
 
-        if (error) {
-            console.error('Błąd usuwania:', error.message);
-            return;
-        }
-
-        // 2. Wysłanie e-maila o usunięciu
         try {
-            await fetch('/api/send-email', {
+            // 1. Usunięcie z bazy Supabase
+            const { error } = await supabase.from('visits').delete().eq('id', item.id);
+            if (error) throw error;
+
+            // 2. Wysłanie powiadomienia e-mail o usunięciu
+            fetch('/api/send-email', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    doctor: eventItem.doctor,
-                    memberName: eventItem.memberName,
-                    date: eventItem.date,
-                    time: eventItem.time,
-                    location: eventItem.location,
-                    type: 'delete' // Informacja dla API, że to usunięcie
-                })
-            });
-        } catch (mailError) {
-            console.error('Nie udało się wysłać powiadomienia e-mail:', mailError);
-        }
+                    doctor: item.doctor,
+                    memberName: memberNames[item.member_key], // Przekształcamy klucz na pełne imię
+                    date: item.date,
+                    time: item.time,
+                    location: item.location,
+                    type: 'delete' // Kluczowy znacznik dla API
+                }),
+            })
+                .then(res => res.json())
+                .then(data => console.log('Odpowiedź Resend (usuwanie):', data))
+                .catch(err => console.error('Błąd wysyłania e-maila o usunięciu:', err));
 
-        // 3. Odświeżenie listy na froncie
-        fetchEvents();
+            // Jeśli usunięte wydarzenie było otwarte w podglądzie dnia, zaktualizuj podgląd
+            if (selectedDayVisits) {
+                setSelectedDayVisits(selectedDayVisits.filter(v => v.id !== item.id));
+            }
+
+            fetchVisits(); // Odśwież listę
+        } catch (err) {
+            console.error('Błąd usuwania:', err);
+            alert('Nie udało się usunąć wydarzenia: ' + err.message);
+        }
     };
 
     // Logika Kalendarza
