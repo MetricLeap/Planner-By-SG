@@ -34,7 +34,7 @@ export default function MainApp() {
     const [currentDate, setCurrentDate] = useState(new Date(2026, 8, 1));
     const [selectedDayVisits, setSelectedDayVisits] = useState(null);
     const [selectedDayTitle, setSelectedDayTitle] = useState('');
-    const [selectedDayRawDate, setSelectedDayRawDate] = useState(''); // Przechowuje surową datę YYYY-MM-DD
+    const [selectedDayRawDate, setSelectedDayRawDate] = useState('');
 
     // Stan Formularza
     const [isFormOpen, setIsFormOpen] = useState(false);
@@ -52,7 +52,8 @@ export default function MainApp() {
         postalCode: '',
         city: '',
         phone: '',
-        cost: ''
+        cost: '',
+        notes: '' // Pole komentarza
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -178,7 +179,7 @@ export default function MainApp() {
             street: formData.street || '',
             phone: formData.phone || '',
             cost: parseFloat(formData.cost) || 0,
-            notes: ''
+            notes: formData.notes || '' // Zapis komentarza
         };
 
         try {
@@ -196,6 +197,7 @@ export default function MainApp() {
                         time: payload.time,
                         location: payload.location,
                         cost: payload.cost,
+                        notes: payload.notes,
                         type: 'update'
                     }),
                 }).catch((err) => console.error('Błąd wysyłania e-maila po edycji:', err));
@@ -214,6 +216,7 @@ export default function MainApp() {
                         time: payload.time,
                         location: payload.location,
                         cost: payload.cost,
+                        notes: payload.notes,
                     }),
                 }).catch((err) => console.error('Błąd wysyłania e-maila:', err));
             }
@@ -233,7 +236,7 @@ export default function MainApp() {
         setIsMultiDay(false);
         setFormData({
             memberKey: 'mom', doctor: '', date: '', startDate: '', endDate: '',
-            location: '', street: '', postalCode: '', city: '', phone: '', cost: ''
+            location: '', street: '', postalCode: '', city: '', phone: '', cost: '', notes: ''
         });
         setIsFormOpen(true);
     };
@@ -252,7 +255,8 @@ export default function MainApp() {
             postalCode: '',
             city: '',
             phone: '',
-            cost: ''
+            cost: '',
+            notes: ''
         });
         setIsFormOpen(true);
     };
@@ -271,7 +275,8 @@ export default function MainApp() {
             postalCode: item.postal_code || '',
             city: item.city || '',
             phone: item.phone || '',
-            cost: item.cost || ''
+            cost: item.cost || '',
+            notes: item.notes || '' // Odczyt komentarza
         });
         setIsFormOpen(true);
     };
@@ -509,21 +514,28 @@ export default function MainApp() {
                                         <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '10px' }}>Brak wydarzeń na ten dzień.</div>
                                     ) : (
                                         selectedDayVisits.map(v => (
-                                            <div key={v.id} className="schedule-item">
-                                                <div>
-                                                    <strong>{v.doctor}</strong>
-                                                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                                                        {memberNames[v.member_key]} {v.location ? `• ${v.location}` : ''}
+                                            <div key={v.id} className="schedule-item" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div>
+                                                        <strong>{v.doctor}</strong>
+                                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                                                            {memberNames[v.member_key]} {v.location ? `• ${v.location}` : ''}
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ display: 'flex', gap: '4px' }}>
+                                                        <button className="action-icon-btn" onClick={() => openFormForEdit(v)}>
+                                                            <span className="material-symbols-outlined">edit</span>
+                                                        </button>
+                                                        <button className="action-icon-btn" onClick={() => handleDelete(v)} style={{ color: '#ef4444' }}>
+                                                            <span className="material-symbols-outlined">delete</span>
+                                                        </button>
                                                     </div>
                                                 </div>
-                                                <div style={{ display: 'flex', gap: '4px' }}>
-                                                    <button className="action-icon-btn" onClick={() => openFormForEdit(v)}>
-                                                        <span className="material-symbols-outlined">edit</span>
-                                                    </button>
-                                                    <button className="action-icon-btn" onClick={() => handleDelete(v)} style={{ color: '#ef4444' }}>
-                                                        <span className="material-symbols-outlined">delete</span>
-                                                    </button>
-                                                </div>
+                                                {v.notes && (
+                                                    <div style={{ marginTop: '6px', fontSize: '0.75rem', color: 'var(--text-muted, #94a3b8)', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '4px' }}>
+                                                        💬 {v.notes}
+                                                    </div>
+                                                )}
                                             </div>
                                         ))
                                     )}
@@ -616,6 +628,17 @@ export default function MainApp() {
                                 <label>Koszt (zł)</label>
                                 <input type="number" step="0.01" value={formData.cost} onChange={e => setFormData({ ...formData, cost: e.target.value })} />
                             </div>
+
+                            <div className="input-group span-2">
+                                <label>Komentarz / Notatka</label>
+                                <textarea
+                                    rows="2"
+                                    placeholder="np. Wziąć skierowanie, dokumentację..."
+                                    value={formData.notes}
+                                    onChange={e => setFormData({ ...formData, notes: e.target.value })}
+                                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '10px', color: 'inherit', resize: 'vertical' }}
+                                />
+                            </div>
                         </div>
 
                         <div className="form-actions">
@@ -658,50 +681,59 @@ export default function MainApp() {
                 ) : (
                     <div className="timeline-list">
                         {filteredVisits.map((item) => (
-                            <div key={item.id} className={`appointment-card tag-${item.member_key}`}>
-                                <div className="appointment-time-badge">
-                                    <span className="time-hour">{item.is_multi_day ? 'Wielodniowe' : item.time}</span>
-                                    <span className="time-date">{item.date}</span>
-                                </div>
-                                <div className="appointment-main">
-                                    <span className={`badge-tag ${item.member_key}`}>{memberNames[item.member_key]}</span>
-                                    <h4>{item.doctor}</h4>
-                                    <div className="appointment-details">
-                                        {item.location && (
-                                            <div className="detail-line">
-                                                <span className="material-symbols-outlined">location_on</span>
-                                                <a
-                                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    style={{ color: 'inherit', textDecoration: 'underline', cursor: 'pointer' }}
-                                                    title="Otwórz w Mapach Google"
-                                                >
-                                                    <strong>{item.location}</strong>
-                                                </a>
-                                            </div>
-                                        )}
-                                        {item.phone && (
-                                            <div className="detail-line">
-                                                <span className="material-symbols-outlined">call</span>
-                                                <a href={`tel:${item.phone}`} className="phone-link">{item.phone}</a>
-                                            </div>
-                                        )}
+                            <div key={item.id} className={`appointment-card tag-${item.member_key}`} style={{ display: 'flex', flexDirection: 'column' }}>
+                                <div style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
+                                    <div className="appointment-time-badge">
+                                        <span className="time-hour">{item.is_multi_day ? 'Wielodniowe' : item.time}</span>
+                                        <span className="time-date">{item.date}</span>
+                                    </div>
+                                    <div className="appointment-main">
+                                        <span className={`badge-tag ${item.member_key}`}>{memberNames[item.member_key]}</span>
+                                        <h4>{item.doctor}</h4>
+                                        <div className="appointment-details">
+                                            {item.location && (
+                                                <div className="detail-line">
+                                                    <span className="material-symbols-outlined">location_on</span>
+                                                    <a
+                                                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        style={{ color: 'inherit', textDecoration: 'underline', cursor: 'pointer' }}
+                                                        title="Otwórz w Mapach Google"
+                                                    >
+                                                        <strong>{item.location}</strong>
+                                                    </a>
+                                                </div>
+                                            )}
+                                            {item.phone && (
+                                                <div className="detail-line">
+                                                    <span className="material-symbols-outlined">call</span>
+                                                    <a href={`tel:${item.phone}`} className="phone-link">{item.phone}</a>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="appointment-meta">
+                                        <span className={`cost-price ${!item.cost ? 'free' : ''}`}>
+                                            {!item.cost || item.cost === 0 ? '0 zł' : `${item.cost} zł`}
+                                        </span>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <button className="action-icon-btn" onClick={() => openFormForEdit(item)} title="Edytuj">
+                                                <span className="material-symbols-outlined">edit</span>
+                                            </button>
+                                            <button className="action-icon-btn" onClick={() => handleDelete(item)} title="Usuń" style={{ color: '#ef4444' }}>
+                                                <span className="material-symbols-outlined">delete</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="appointment-meta">
-                                    <span className={`cost-price ${!item.cost ? 'free' : ''}`}>
-                                        {!item.cost || item.cost === 0 ? '0 zł' : `${item.cost} zł`}
-                                    </span>
-                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                        <button className="action-icon-btn" onClick={() => openFormForEdit(item)} title="Edytuj">
-                                            <span className="material-symbols-outlined">edit</span>
-                                        </button>
-                                        <button className="action-icon-btn" onClick={() => handleDelete(item)} title="Usuń" style={{ color: '#ef4444' }}>
-                                            <span className="material-symbols-outlined">delete</span>
-                                        </button>
+                                {/* Wyświetlanie komentarza na dole karty, jeśli istnieje */}
+                                {item.notes && (
+                                    <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.08)', fontSize: '0.85rem', color: 'var(--text-muted, #94a3b8)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>comment</span>
+                                        <span>{item.notes}</span>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         ))}
                     </div>
