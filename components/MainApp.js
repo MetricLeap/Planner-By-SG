@@ -332,7 +332,7 @@ export default function MainApp() {
                         <div style={{ marginBottom: '20px' }}>
                             <form onSubmit={handleSavePlace} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 <div className="input-group">
-                                    <label>Nazwa placówki / gabinetu</label>
+                                    <label>Nazwa miejsca</label>
                                     <input type="text" required placeholder="np. LuxMed / Przychodnia" value={newPlace.name} onChange={e => setNewPlace({ ...newPlace, name: e.target.value })} />
                                 </div>
                                 <div className="input-group">
@@ -501,7 +501,7 @@ export default function MainApp() {
                     <form className="app-form" onSubmit={handleFormSubmit}>
                         <div className="form-grid">
                             <div className="input-group">
-                                <label>Uczestnik / Pacjent</label>
+                                <label>Uczestnik</label>
                                 <select value={formData.memberKey} onChange={e => setFormData({ ...formData, memberKey: e.target.value })}>
                                     <option value="mom">Nataliia</option>
                                     <option value="dad">Sebastian</option>
