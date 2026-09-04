@@ -376,7 +376,7 @@ export default function MainApp() {
                     <form className="app-form" onSubmit={handleFormSubmit}>
                         <div className="form-grid">
                             <div className="input-group">
-                                <label>Uczestnik / Pacjent</label>
+                                <label>Uczestnik</label>
                                 <select value={formData.memberKey} onChange={e => setFormData({ ...formData, memberKey: e.target.value })}>
                                     <option value="mom">Nataliia</option>
                                     <option value="dad">Sebastian</option>
@@ -451,7 +451,7 @@ export default function MainApp() {
                     <h2>
                         {selectedMemberFilter
                             ? `Wydarzenia: ${memberNames[selectedMemberFilter]}`
-                            : 'Nadchodzące wydarzenia i wizyty'}
+                            : 'Nadchodzące wydarzenia'}
                     </h2>
                     {selectedMemberFilter && (
                         <button
