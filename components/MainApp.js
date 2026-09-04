@@ -298,9 +298,29 @@ export default function MainApp() {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const prevMonthDays = new Date(year, month, 0).getDate();
 
-    const handleDayClick = (day, visitsForDay) => {
-        setSelectedDayTitle(`Plan dnia: ${day} ${monthNamesPL[month]} ${year}`);
-        setSelectedDayVisits(visitsForDay);
+    const handleDayClick = (day) => {
+        // Składamy sformatowaną datę YYYY-MM-DD dla klikniętego dnia
+        const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+        // Resetujemy stan formularza pod nowe wydarzenie
+        setEditId(null);
+        setIsMultiDay(false);
+        setFormData({
+            memberKey: 'mom',
+            doctor: '',
+            date: `${formattedDate}T09:00`, // Domyślna godzina 09:00, którą można zmienić
+            startDate: formattedDate,
+            endDate: formattedDate,
+            location: '',
+            street: '',
+            postalCode: '',
+            city: '',
+            phone: '',
+            cost: ''
+        });
+
+        // Otwieramy formularz
+        setIsFormOpen(true);
     };
 
     return (
