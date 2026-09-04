@@ -24,6 +24,7 @@ export default function MainApp() {
     const [savedPlaces, setSavedPlaces] = useState([]);
     const [isPlacesModalOpen, setIsPlacesModalOpen] = useState(false);
     const [newPlace, setNewPlace] = useState({ name: '', address: '', phone: '' });
+    const [editPlaceId, setEditPlaceId] = useState(null); // Stan edycji miejsca
 
     // Stan filtrowania po uzytkowniku
     const [selectedMemberFilter, setSelectedMemberFilter] = useState(null);
@@ -82,18 +83,37 @@ export default function MainApp() {
         fetchPlaces();
     }, []);
 
-    // Dodawanie nowego miejsca do bazy
-    const handleAddPlace = async (e) => {
+    // Dodawanie lub edycja miejsca w bazie
+    const handleSavePlace = async (e) => {
         e.preventDefault();
         if (!newPlace.name) return;
 
-        const { error } = await supabase.from('saved_places').insert([newPlace]);
-        if (error) {
-            alert('Błąd zapisu miejsca: ' + error.message);
+        if (editPlaceId) {
+            // Edycja istniejącego miejsca
+            const { error } = await supabase.from('saved_places').update(newPlace).eq('id', editPlaceId);
+            if (error) {
+                alert('Błąd aktualizacji miejsca: ' + error.message);
+            } else {
+                setNewPlace({ name: '', address: '', phone: '' });
+                setEditPlaceId(null);
+                fetchPlaces();
+            }
         } else {
-            setNewPlace({ name: '', address: '', phone: '' });
-            fetchPlaces();
+            // Dodawanie nowego miejsca
+            const { error } = await supabase.from('saved_places').insert([newPlace]);
+            if (error) {
+                alert('Błąd zapisu miejsca: ' + error.message);
+            } else {
+                setNewPlace({ name: '', address: '', phone: '' });
+                fetchPlaces();
+            }
         }
+    };
+
+    // Wczytanie miejsca do edycji
+    const handleEditPlaceClick = (p) => {
+        setEditPlaceId(p.id);
+        setNewPlace({ name: p.name, address: p.address || '', phone: p.phone || '' });
     };
 
     // Usuwanie miejsca z bazy
@@ -102,6 +122,10 @@ export default function MainApp() {
         if (error) {
             alert('Błąd usuwania miejsca: ' + error.message);
         } else {
+            if (editPlaceId === id) {
+                setEditPlaceId(null);
+                setNewPlace({ name: '', address: '', phone: '' });
+            }
             fetchPlaces();
         }
     };
@@ -288,7 +312,6 @@ export default function MainApp() {
                         <span className="material-symbols-outlined">calendar_month</span>
                         <span>Kalendarz</span>
                     </button>
-                    {/* NOWY PRZYCISK: Miejsca */}
                     <button className="btn-app btn-secondary" onClick={() => setIsPlacesModalOpen(true)}>
                         <span className="material-symbols-outlined">place</span>
                         <span>Miejsca</span>
@@ -303,16 +326,16 @@ export default function MainApp() {
                 </div>
             </header>
 
-            {/* MODAL ZARZĄDZANIA MIEJSCAMI */}
+            {/* MODAL ZARZĄDZANIA I EDYCJI MIEJSC */}
             {isPlacesModalOpen && (
                 <div className="form-drawer open" style={{ zIndex: 1100 }}>
                     <div className="glass-card form-card" style={{ maxWidth: '500px' }}>
                         <div className="form-card-header">
-                            <h3>Moje zapisane miejsca</h3>
-                            <button type="button" className="icon-btn-close" onClick={() => setIsPlacesModalOpen(false)}>&times;</button>
+                            <h3>{editPlaceId ? 'Edytuj miejsce' : 'Moje zapisane miejsca'}</h3>
+                            <button type="button" className="icon-btn-close" onClick={() => { setIsPlacesModalOpen(false); setEditPlaceId(null); setNewPlace({ name: '', address: '', phone: '' }); }}>&times;</button>
                         </div>
                         <div style={{ marginBottom: '20px' }}>
-                            <form onSubmit={handleAddPlace} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <form onSubmit={handleSavePlace} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 <div className="input-group">
                                     <label>Nazwa placówki / gabinetu</label>
                                     <input type="text" required placeholder="np. LuxMed / Przychodnia" value={newPlace.name} onChange={e => setNewPlace({ ...newPlace, name: e.target.value })} />
@@ -325,11 +348,20 @@ export default function MainApp() {
                                     <label>Numer telefonu</label>
                                     <input type="tel" placeholder="np. 33 123 45 67" value={newPlace.phone} onChange={e => setNewPlace({ ...newPlace, phone: e.target.value })} />
                                 </div>
-                                <button type="submit" className="btn-app btn-primary" style={{ marginTop: '5px' }}>Dodaj miejsce</button>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <button type="submit" className="btn-app btn-primary" style={{ flex: 1 }}>
+                                        {editPlaceId ? 'Zapisz zmiany' : 'Dodaj miejsce'}
+                                    </button>
+                                    {editPlaceId && (
+                                        <button type="button" className="btn-app btn-secondary" onClick={() => { setEditPlaceId(null); setNewPlace({ name: '', address: '', phone: '' }); }}>
+                                            Anuluj
+                                        </button>
+                                    )}
+                                </div>
                             </form>
                         </div>
 
-                        <div className="schedule-items-list" style={{ maxHeight: '250px', overflowY: 'auto' }}>
+                        <div className="schedule-items-list" style={{ maxHeight: '220px', overflowY: 'auto' }}>
                             <h4 style={{ fontSize: '0.9rem', marginBottom: '10px', color: 'var(--text-muted)' }}>Lista zapisanych miejsc:</h4>
                             {savedPlaces.length === 0 ? (
                                 <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Brak zapisanych miejsc.</p>
@@ -340,9 +372,14 @@ export default function MainApp() {
                                             <strong>{p.name}</strong>
                                             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{p.address} {p.phone ? `• Tel: ${p.phone}` : ''}</div>
                                         </div>
-                                        <button className="action-icon-btn" onClick={() => handleDeletePlace(p.id)} style={{ color: '#ef4444' }}>
-                                            <span className="material-symbols-outlined">delete</span>
-                                        </button>
+                                        <div style={{ display: 'flex', gap: '4px' }}>
+                                            <button className="action-icon-btn" onClick={() => handleEditPlaceClick(p)} title="Edytuj miejsce">
+                                                <span className="material-symbols-outlined">edit</span>
+                                            </button>
+                                            <button className="action-icon-btn" onClick={() => handleDeletePlace(p.id)} title="Usuń miejsce" style={{ color: '#ef4444' }}>
+                                                <span className="material-symbols-outlined">delete</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 ))
                             )}
@@ -509,7 +546,6 @@ export default function MainApp() {
                                 </>
                             )}
 
-                            {/* WYBÓR Z ZAPISANYCH MIEJSC LUB WPISZ RĘCZNIE */}
                             <div className="input-group span-2">
                                 <label>Wybierz zapisane miejsce (lub wpisz poniżej)</label>
                                 <select onChange={handleSelectPlaceChange} defaultValue="" style={{ marginBottom: '8px' }}>
