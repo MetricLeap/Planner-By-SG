@@ -9,8 +9,8 @@ export async function POST(request) {
         const formattedCost = !cost || cost === 0 ? '0 zł (Bezpłatnie)' : `${cost} zł`;
 
         const data = await resend.emails.send({
-            from: 'PlannerBySG <onboarding@resend.dev>',
-            to: ['twoj-email-z-resend@gmail.com'], // Pamiętaj o właściwym mailu
+            from: 'Planner By SG<powiadomienia@plannerbysg.pl>',
+            to: ['s.gasior97@gmail.com'], // Pamiętaj o właściwym mailu
             subject: `Nowe wydarzenie: ${doctor}`,
             html: `
         <div style="font-family: sans-serif; padding: 20px; color: #333;">
