@@ -26,6 +26,9 @@ export default function MainApp() {
     const [newPlace, setNewPlace] = useState({ name: '', address: '', phone: '' });
     const [editPlaceId, setEditPlaceId] = useState(null);
 
+    // Stan rozwijania notatek na kartach (przechowuje ID wizyt z rozwiniętą notatką)
+    const [expandedNotes, setExpandedNotes] = useState({});
+
     // Stan filtrowania po uzytkowniku
     const [selectedMemberFilter, setSelectedMemberFilter] = useState(null);
 
@@ -84,6 +87,10 @@ export default function MainApp() {
         fetchVisits();
         fetchPlaces();
     }, []);
+
+    const toggleNoteExpansion = (id) => {
+        setExpandedNotes(prev => ({ ...prev, [id]: !prev[id] }));
+    };
 
     // Dodawanie lub edycja miejsca w bazie
     const handleSavePlace = async (e) => {
@@ -678,59 +685,98 @@ export default function MainApp() {
                     <p style={{ color: 'var(--text-muted)' }}>Brak zaplanowanych wydarzeń. Dodaj pierwsze!</p>
                 ) : (
                     <div className="timeline-list">
-                        {filteredVisits.map((item) => (
-                            <div key={item.id} className={`appointment-card tag-${item.member_key}`} style={{ display: 'flex', flexDirection: 'column' }}>
-                                <div className="appointment-card-row" style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
-                                    <div className="appointment-time-badge">
-                                        <span className="time-hour">{item.is_multi_day ? 'Wielodniowe' : item.time}</span>
-                                        <span className="time-date">{item.date}</span>
-                                    </div>
-                                    <div className="appointment-main">
-                                        <span className={`badge-tag ${item.member_key}`}>{memberNames[item.member_key]}</span>
-                                        <h4>{item.doctor}</h4>
-                                        <div className="appointment-details">
-                                            {item.location && (
-                                                <div className="detail-line">
-                                                    <span className="material-symbols-outlined">location_on</span>
-                                                    <a
-                                                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        style={{ color: 'inherit', textDecoration: 'underline', cursor: 'pointer' }}
-                                                        title="Otwórz w Mapach Google"
-                                                    >
-                                                        <strong>{item.location}</strong>
-                                                    </a>
-                                                </div>
-                                            )}
-                                            {item.phone && (
-                                                <div className="detail-line">
-                                                    <span className="material-symbols-outlined">call</span>
-                                                    <a href={`tel:${item.phone}`} className="phone-link">{item.phone}</a>
-                                                </div>
-                                            )}
+                        {filteredVisits.map((item) => {
+                            const isExpanded = !!expandedNotes[item.id];
+                            return (
+                                <div key={item.id} className={`appointment-card tag-${item.member_key}`} style={{ display: 'flex', flexDirection: 'column', width: '100%', boxSizing: 'border-box' }}>
+                                    {/* Górny wiersz z klasycznym układem i ikonami po prawej stronie */}
+                                    <div style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+                                        <div className="appointment-time-badge" style={{ flexShrink: 0 }}>
+                                            <span className="time-hour">{item.is_multi_day ? 'Wielodniowe' : item.time}</span>
+                                            <span className="time-date">{item.date}</span>
+                                        </div>
+
+                                        <div className="appointment-main" style={{ flex: '1 1 180px', minWidth: '150px' }}>
+                                            <span className={`badge-tag ${item.member_key}`}>{memberNames[item.member_key]}</span>
+                                            <h4>{item.doctor}</h4>
+                                            <div className="appointment-details">
+                                                {item.location && (
+                                                    <div className="detail-line">
+                                                        <span className="material-symbols-outlined">location_on</span>
+                                                        <a
+                                                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            style={{ color: 'inherit', textDecoration: 'underline', cursor: 'pointer' }}
+                                                            title="Otwórz w Mapach Google"
+                                                        >
+                                                            <strong>{item.location}</strong>
+                                                        </a>
+                                                    </div>
+                                                )}
+                                                {item.phone && (
+                                                    <div className="detail-line">
+                                                        <span className="material-symbols-outlined">call</span>
+                                                        <a href={`tel:${item.phone}`} className="phone-link">{item.phone}</a>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Sekcja ceny i ikon po prawej stronie */}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto', flexShrink: 0 }}>
+                                            <span className={`cost-price ${!item.cost ? 'free' : ''}`}>
+                                                {!item.cost || item.cost === 0 ? '0 zł' : `${item.cost} zł`}
+                                            </span>
+                                            <div style={{ display: 'flex', gap: '6px' }}>
+                                                <button className="action-icon-btn" onClick={() => openFormForEdit(item)} title="Edytuj">
+                                                    <span className="material-symbols-outlined">edit</span>
+                                                </button>
+                                                <button className="action-icon-btn" onClick={() => handleDelete(item)} title="Usuń" style={{ color: '#ef4444' }}>
+                                                    <span className="material-symbols-outlined">delete</span>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="appointment-meta">
-                                        <span className={`cost-price ${!item.cost ? 'free' : ''}`}>
-                                            {!item.cost || item.cost === 0 ? '0 zł' : `${item.cost} zł`}
-                                        </span>
-                                        <div style={{ display: 'flex', gap: '8px' }}>
-                                            <button className="action-icon-btn" onClick={() => openFormForEdit(item)} title="Edytuj">
-                                                <span className="material-symbols-outlined">edit</span>
-                                            </button>
-                                            <button className="action-icon-btn" onClick={() => handleDelete(item)} title="Usuń" style={{ color: '#ef4444' }}>
-                                                <span className="material-symbols-outlined">delete</span>
-                                            </button>
+
+                                    {/* Dolny wiersz: zwinięta informacja o notatce z opcją rozwijania */}
+                                    <div
+                                        onClick={() => item.notes && toggleNoteExpansion(item.id)}
+                                        style={{
+                                            marginTop: '12px',
+                                            paddingTop: '8px',
+                                            borderTop: '1px solid rgba(255,255,255,0.08)',
+                                            fontSize: '0.85rem',
+                                            color: item.notes ? 'var(--text-muted, #94a3b8)' : 'rgba(148, 163, 184, 0.4)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            cursor: item.notes ? 'pointer' : 'default',
+                                            fontStyle: item.notes ? 'normal' : 'italic',
+                                            userSelect: 'none',
+                                            width: '100%'
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>comment</span>
+                                            <span>{item.notes ? (isExpanded ? 'Ukryj notatkę' : 'Notatka do przeczytania') : 'Brak notatek'}</span>
                                         </div>
+                                        {item.notes && (
+                                            <span className="material-symbols-outlined" style={{ fontSize: '1.1rem', transition: 'transform 0.2s', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                                                expand_more
+                                            </span>
+                                        )}
                                     </div>
+
+                                    {/* Rozwinięta treść notatki */}
+                                    {isExpanded && item.notes && (
+                                        <div style={{ marginTop: '8px', padding: '8px 10px', background: 'rgba(255,255,255,0.03)', borderRadius: '6px', fontSize: '0.85rem', color: 'inherit', borderLeft: '2px solid var(--primary, #3b82f6)', width: '100%', boxSizing: 'border-box' }}>
+                                            {item.notes}
+                                        </div>
+                                    )}
                                 </div>
-                                <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.08)', fontSize: '0.85rem', color: item.notes ? 'var(--text-muted, #94a3b8)' : 'rgba(148, 163, 184, 0.4)', display: 'flex', alignItems: 'center', gap: '6px', fontStyle: item.notes ? 'normal' : 'italic' }}>
-                                    <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>comment</span>
-                                    <span>{item.notes ? item.notes : 'Brak notatek'}</span>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </section>
