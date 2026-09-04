@@ -34,6 +34,7 @@ export default function MainApp() {
     const [currentDate, setCurrentDate] = useState(new Date(2026, 8, 1));
     const [selectedDayVisits, setSelectedDayVisits] = useState(null);
     const [selectedDayTitle, setSelectedDayTitle] = useState('');
+    const [selectedDayRawDate, setSelectedDayRawDate] = useState(''); // Przechowuje surową datę YYYY-MM-DD
 
     // Stan Formularza
     const [isFormOpen, setIsFormOpen] = useState(false);
@@ -237,6 +238,25 @@ export default function MainApp() {
         setIsFormOpen(true);
     };
 
+    const openFormForDate = (dateStr) => {
+        setEditId(null);
+        setIsMultiDay(false);
+        setFormData({
+            memberKey: 'mom',
+            doctor: '',
+            date: `${dateStr}T09:00`,
+            startDate: dateStr,
+            endDate: dateStr,
+            location: '',
+            street: '',
+            postalCode: '',
+            city: '',
+            phone: '',
+            cost: ''
+        });
+        setIsFormOpen(true);
+    };
+
     const openFormForEdit = (item) => {
         setEditId(item.id);
         setIsMultiDay(item.is_multi_day || false);
@@ -298,29 +318,10 @@ export default function MainApp() {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const prevMonthDays = new Date(year, month, 0).getDate();
 
-    const handleDayClick = (day) => {
-        // Składamy sformatowaną datę YYYY-MM-DD dla klikniętego dnia
-        const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-
-        // Resetujemy stan formularza pod nowe wydarzenie
-        setEditId(null);
-        setIsMultiDay(false);
-        setFormData({
-            memberKey: 'mom',
-            doctor: '',
-            date: `${formattedDate}T09:00`, // Domyślna godzina 09:00, którą można zmienić
-            startDate: formattedDate,
-            endDate: formattedDate,
-            location: '',
-            street: '',
-            postalCode: '',
-            city: '',
-            phone: '',
-            cost: ''
-        });
-
-        // Otwieramy formularz
-        setIsFormOpen(true);
+    const handleDayClick = (day, visitsForDay, formattedDate) => {
+        setSelectedDayTitle(`Plan dnia: ${day} ${monthNamesPL[month]} ${year}`);
+        setSelectedDayVisits(visitsForDay);
+        setSelectedDayRawDate(formattedDate);
     };
 
     return (
@@ -489,7 +490,7 @@ export default function MainApp() {
                                 const visitsForDay = filteredVisits.filter(v => v.is_multi_day ? (formattedDate >= v.date && formattedDate <= v.end_date) : v.date === formattedDate);
 
                                 return (
-                                    <div key={day} className="cal-day-cell" onClick={() => handleDayClick(day, visitsForDay)}>
+                                    <div key={day} className="cal-day-cell" onClick={() => handleDayClick(day, visitsForDay, formattedDate)}>
                                         <span>{day}</span>
                                         {visitsForDay.length > 0 && <div className="count-badge">{visitsForDay.length}</div>}
                                     </div>
@@ -505,7 +506,7 @@ export default function MainApp() {
                                 </div>
                                 <div className="schedule-items-list">
                                     {selectedDayVisits.length === 0 ? (
-                                        <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Brak wydarzeń na ten dzień.</div>
+                                        <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '10px' }}>Brak wydarzeń na ten dzień.</div>
                                     ) : (
                                         selectedDayVisits.map(v => (
                                             <div key={v.id} className="schedule-item">
@@ -526,6 +527,16 @@ export default function MainApp() {
                                             </div>
                                         ))
                                     )}
+                                </div>
+                                <div style={{ marginTop: '12px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px' }}>
+                                    <button
+                                        className="btn-app btn-primary btn-full"
+                                        style={{ fontSize: '0.85rem', padding: '8px' }}
+                                        onClick={() => openFormForDate(selectedDayRawDate)}
+                                    >
+                                        <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>add</span>
+                                        <span>Dodaj wydarzenie na ten dzień</span>
+                                    </button>
                                 </div>
                             </div>
                         )}
