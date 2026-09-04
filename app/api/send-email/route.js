@@ -23,7 +23,7 @@ export async function POST(req) {
           <h2 style="color: ${isDelete ? '#dc2626' : '#2563eb'};">${headingText}</h2>
           <ul>
             <li><strong>Uczestnik:</strong> ${memberName}</li>
-            <li><strong>Wydarzenie / Lekarz:</strong> ${doctor}</li>
+            <li><strong>Wydarzenie:</strong> ${doctor}</li>
             <li><strong>Data:</strong> ${date}</li>
             <li><strong>Godzina:</strong> ${time}</li>
             <li><strong>Miejsce:</strong> ${location || 'Nie podano'}</li>
