@@ -387,7 +387,7 @@ export default function MainApp() {
                             </div>
 
                             <div className="input-group">
-                                <label>Nazwa wydarzenia / Lekarz</label>
+                                <label>Nazwa wydarzenia</label>
                                 <input type="text" required placeholder="np. Stomatolog" value={formData.doctor} onChange={e => setFormData({ ...formData, doctor: e.target.value })} />
                             </div>
 
@@ -417,7 +417,7 @@ export default function MainApp() {
                             )}
 
                             <div className="input-group span-2">
-                                <label>Przychodnia / Miejsce</label>
+                                <label>Miejsce i adres</label>
                                 <input type="text" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} />
                             </div>
                             <div className="input-group">
