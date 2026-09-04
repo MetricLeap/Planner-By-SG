@@ -45,6 +45,23 @@ export default function MainApp() {
         cost: ''
     });
 
+    // 1. Dodaj stan ładowania na początku komponentu formularza
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true); // Włączamy ładowanie
+
+        try {
+            // ... Twój dotychczasowy kod zapisu do Supabase i wysyłki e-maila ...
+
+        } catch (error) {
+            console.error('Błąd:', error);
+        } finally {
+            setIsSubmitting(false); // Wyłączamy ładowanie bez względu na sukces/błąd
+        }
+    };
+
     // Fetch danych z Supabase
     const fetchVisits = async () => {
         setLoadingVisits(true);
@@ -404,8 +421,14 @@ export default function MainApp() {
                         </div>
 
                         <div className="form-actions">
-                            <button type="submit" className="btn-app btn-primary btn-full">
-                                {editId ? 'Zapisz zmiany' : 'Zapisz w terminarzu'}
+                            <button type="submit" disabled={isSubmitting} className="btn-app btn-primary btn-full">
+                                {isSubmitting ? (
+                                    <span className="btn-loading-content">
+                                        <span className="spinner"></span> Zapisywanie...
+                                    </span>
+                                ) : (
+                                    editId ? 'Zapisz zmiany' : 'Zapisz w terminarzu'
+                                )}
                             </button>
                         </div>
                     </form>
