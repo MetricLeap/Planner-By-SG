@@ -159,7 +159,7 @@ export default function MainApp() {
 
     // Funkcja usuwania wydarzenia z bazy Supabase
     // Przykład w miejscu obsługi usuwania (np. handleDelete)
-    const handleDeleteEvent = async (eventItem) => {
+    const handleDelete = async (eventItem) => {
         // 1. Usunięcie z bazy Supabase
         const { error } = await supabase
             .from('events')
