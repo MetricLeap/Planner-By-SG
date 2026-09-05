@@ -174,7 +174,7 @@ export default function MainApp() {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        action: 'created',
+                        action: 'updated',
                         doctor: payload.doctor,
                         date: payload.date,
                         time: payload.time,
@@ -184,6 +184,7 @@ export default function MainApp() {
                         cost: payload.cost // <-- dodane
                     })
                 });
+
             } else {
                 const { error } = await supabase.from('visits').insert([payload]);
                 if (error) throw error;
@@ -192,6 +193,7 @@ export default function MainApp() {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        action: 'created',
                         doctor: payload.doctor,
                         date: payload.date,
                         time: payload.time,
