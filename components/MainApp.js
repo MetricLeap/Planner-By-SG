@@ -325,7 +325,7 @@ export default function MainApp() {
                     const isSelected = selectedMemberFilter === key;
                     return (
                         <div key={key} className={`member-card ${key} ${isSelected ? 'selected' : ''}`} onClick={() => handleMemberCardClick(key)} style={{ cursor: 'pointer', border: isSelected ? '2px solid var(--primary, #3b82f6)' : undefined, padding: '10px' }}>
-                            <div className="member-avatar" style={{ width: '32px', height: '32px', fontSize: '0.85rem' }}>{key === 'mom' ? 'M' : key === 'dad' ? 'T' : key === 'child1' ? 'C1' : 'C2'}</div>
+                            <div className="member-avatar" style={{ width: '32px', height: '32px', fontSize: '0.85rem' }}>{key === 'mom' ? 'N' : key === 'dad' ? 'S' : key === 'child1' ? 'K' : 'E'}</div>
                             <div className="member-info">
                                 <span className="member-name" style={{ fontSize: '0.85rem' }}>{memberNames[key]}</span>
                                 <span className="member-status" style={{ fontSize: '0.7rem' }}>{visits.filter(v => v.member_key === key).length} zaplanowanych</span>
