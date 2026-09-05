@@ -339,10 +339,26 @@ export default function MainApp() {
             {calendarVisible && (
                 <section className="calendar-section visible" style={{ marginBottom: '15px' }}>
                     <div className="glass-card" style={{ padding: '12px' }}>
-                        <div className="calendar-header" style={{ marginBottom: '10px' }}>
-                            <button className="icon-btn" onClick={() => setCurrentDate(new Date(year, month - 1, 1))}><span className="material-symbols-outlined">chevron_left</span></button>
-                            <h2 className="month-title" style={{ fontSize: '1rem' }}>{monthNamesPL[month]} {year}</h2>
-                            <button className="icon-btn" onClick={() => setCurrentDate(new Date(year, month + 1, 1))}><span className="material-symbols-outlined">chevron_right</span></button>
+                        <div className="calendar-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', gap: '4px' }}>
+                            <div style={{ display: 'flex', gap: '4px' }}>
+                                <button className="icon-btn" onClick={() => setCurrentDate(new Date(year - 1, month, 1))} title="Poprzedni rok">
+                                    <span className="material-symbols-outlined">keyboard_double_arrow_left</span>
+                                </button>
+                                <button className="icon-btn" onClick={() => setCurrentDate(new Date(year, month - 1, 1))} title="Poprzedni miesiąc">
+                                    <span className="material-symbols-outlined">chevron_left</span>
+                                </button>
+                            </div>
+
+                            <h2 className="month-title" style={{ fontSize: '0.95rem', textAlign: 'center' }}>{monthNamesPL[month]} {year}</h2>
+
+                            <div style={{ display: 'flex', gap: '4px' }}>
+                                <button className="icon-btn" onClick={() => setCurrentDate(new Date(year, month + 1, 1))} title="Następny miesiąc">
+                                    <span className="material-symbols-outlined">chevron_right</span>
+                                </button>
+                                <button className="icon-btn" onClick={() => setCurrentDate(new Date(year + 1, month, 1))} title="Następny rok">
+                                    <span className="material-symbols-outlined">keyboard_double_arrow_right</span>
+                                </button>
+                            </div>
                         </div>
                         <div className="calendar-grid-header" style={{ fontSize: '0.75rem', marginBottom: '5px' }}>
                             <span>Pn</span><span>Wt</span><span>Śr</span><span>Cz</span><span>Pt</span><span>So</span><span>Nd</span>
