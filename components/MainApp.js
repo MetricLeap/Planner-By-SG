@@ -171,6 +171,19 @@ export default function MainApp() {
             } else {
                 const { error } = await supabase.from('visits').insert([payload]);
                 if (error) throw error;
+
+                await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        doctor: payload.doctor,
+                        date: payload.date,
+                        time: payload.time,
+                        memberKey: memberNames[payload.member_key],
+                        location: payload.location,
+                        notes: payload.notes
+                    })
+                });
             }
             closeForm();
             fetchVisits();
