@@ -789,19 +789,35 @@ textarea:focus {
     max-width: 100%;
   }
 
-  /* Naprawa pol daty i czasu na mobile */
+  /* Ujednolicenie wyglądu i wysokości wszystkich pól formularza na mobile */
+  input[type="text"],
+  input[type="tel"],
+  input[type="number"],
   input[type="date"],
   input[type="datetime-local"],
-  input[type="time"] {
+  input[type="time"],
+  select,
+  textarea {
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
     appearance: none;
     -webkit-appearance: none;
     font-size: 16px !important;
-    /* Zapobiega zoomowaniu na iOS i wymusza czytelność */
-    /* padding: 10px 12px; */
+    min-height: 44px;
+    /* Wymusza jednakową, bezpieczną wysokość dla dotyku */
+    padding: 10px 14px !important;
     background-color: var(--surface);
+    display: block;
+  }
+
+  /* Poprawka dla kontrolek daty, które lubią zwężać się przy braku wartości */
+  input[type="date"]::-webkit-datetime-edit,
+  input[type="datetime-local"]::-webkit-datetime-edit {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    width: 100%;
   }
 
   .span-2 {
