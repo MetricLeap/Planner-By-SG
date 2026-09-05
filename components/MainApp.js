@@ -557,8 +557,17 @@ export default function MainApp() {
                                     {/* Górny rząd: Data, Tytuł, Cena oraz ikony po prawej */}
                                     <div className="appointment-header-desktop">
                                         <div className="appointment-time-badge">
-                                            <span style={{ fontSize: '0.8rem', display: 'block', fontWeight: 'bold' }}>{item.is_multi_day ? 'Wielodniowe' : item.time}</span>
-                                            <span style={{ fontSize: '0.65rem', color: '#94a3b8', display: 'block' }}>{item.date}</span>
+                                            <span style={{ fontSize: '0.8rem', display: 'block', fontWeight: 'bold' }}>
+                                                {item.is_multi_day ? 'Wielodniowe' : item.time}
+                                            </span>
+                                            <span style={{ fontSize: '0.65rem', color: '#94a3b8', display: 'block' }}>
+                                                {item.date}
+                                            </span>
+                                            {item.is_multi_day && item.end_date && (
+                                                <span style={{ fontSize: '0.65rem', color: '#94a3b8', display: 'block' }}>
+                                                    {item.end_date}
+                                                </span>
+                                            )}
                                         </div>
 
                                         <div className="appointment-main-content">
