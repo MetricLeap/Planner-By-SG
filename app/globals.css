@@ -757,6 +757,38 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 
+  .form-drawer.open {
+    max-height: calc(100vh - 100px);
+    /* Ograniczenie wysokości do okna przeglądarki na telefonie */
+    overflow-y: auto;
+    position: sticky;
+    top: 10px;
+    z-index: 100;
+  }
+
+  .form-card {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .span-2 {
+    grid-column: span 1;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    /* Wymuszenie, aby pola nigdy nie wystawały poza szerokość ekranu */
+    max-width: 100%;
+  }
+
   .span-2 {
     grid-column: span 1;
   }
