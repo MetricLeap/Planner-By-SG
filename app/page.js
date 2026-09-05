@@ -32,7 +32,7 @@ export default function Home() {
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <p>Ładowanie HealthHub...</p>
+        <p>Ładowanie Planner By SG...</p>
       </div>
     );
   }
