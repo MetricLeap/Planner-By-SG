@@ -890,6 +890,32 @@ textarea:focus {
   .app-shell {
     padding-bottom: 80px !important;
   }
+
+  /* Naprawa checkboxa i etykiety wydarzenia wielodniowego */
+  .checkbox-group {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 8px 0 !important;
+    grid-column: span 1 !important;
+  }
+
+  .switch-label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+    cursor: pointer;
+  }
+
+  .switch-label input[type="checkbox"] {
+    width: 20px !important;
+    height: 20px !important;
+    min-height: 20px !important;
+    margin: 0 !important;
+    flex-shrink: 0;
+    accent-color: var(--primary);
+  }
 }
 
 @keyframes fadeIn {
