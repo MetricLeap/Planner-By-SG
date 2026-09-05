@@ -25,6 +25,7 @@ export async function POST(request) {
                     ${notes ? `<p><strong>Notatka:</strong> ${notes}</p>` : ''}
                     <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
             <p style="font-size: 12px; color: #666;">Powiadomienie z cyklicznego automatycznego systemu Planner By SG.</p>
+            <p style="font-size: 12px; color: #666;">https://plannerbysg.pl | All rights reserved by Sebastian Gąsior</p>
                 `;
                 break;
 
@@ -40,6 +41,7 @@ export async function POST(request) {
                     ${notes ? `<p><strong>Notatka:</strong> ${notes}</p>` : ''}
                     <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
             <p style="font-size: 12px; color: #666;">Powiadomienie z cyklicznego automatycznego systemu Planner By SG.</p>
+            <p style="font-size: 12px; color: #666;">https://plannerbysg.pl | All rights reserved by Sebastian Gąsior</p>
                 `;
                 break;
 
@@ -54,6 +56,7 @@ export async function POST(request) {
                     <p>To wydarzenie zostało usunięte z terminarza.</p>
                     <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
             <p style="font-size: 12px; color: #666;">Powiadomienie z cyklicznego automatycznego systemu Planner By SG.</p>
+            <p style="font-size: 12px; color: #666;">https://plannerbysg.pl | All rights reserved by Sebastian Gąsior</p>
                 `;
                 break;
 
