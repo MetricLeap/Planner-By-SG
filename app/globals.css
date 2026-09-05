@@ -789,6 +789,21 @@ textarea:focus {
     max-width: 100%;
   }
 
+  /* Naprawa pol daty i czasu na mobile */
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="time"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    appearance: none;
+    -webkit-appearance: none;
+    font-size: 16px !important;
+    /* Zapobiega zoomowaniu na iOS i wymusza czytelność */
+    padding: 10px 12px;
+    background-color: var(--surface);
+  }
+
   .span-2 {
     grid-column: span 1;
   }
