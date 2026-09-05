@@ -383,6 +383,47 @@ export default function MainApp() {
                 </section>
             )}
 
+            {/* PANEL WYBRANEGO DNIA Z KALENDARZA */}
+            {selectedDayVisits && (
+                <section className="glass-card" style={{ marginBottom: '15px', padding: '12px', background: 'var(--surface-subtle, #f1f5f9)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <h3 style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>{selectedDayTitle}</h3>
+                        <button type="button" className="icon-btn-close" onClick={() => setSelectedDayVisits(null)} style={{ fontSize: '1.2rem', background: 'none', border: 'none', cursor: 'pointer' }}>&times;</button>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {selectedDayVisits.length === 0 ? (
+                            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Brak zaplanowanych wydarzeń w tym dniu.</p>
+                        ) : (
+                            selectedDayVisits.map(item => (
+                                <div key={item.id} style={{ background: 'white', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div>
+                                        <span className={`badge-tag ${item.member_key}`} style={{ fontSize: '0.6rem', padding: '1px 4px', display: 'inline-block', marginBottom: '2px' }}>{memberNames[item.member_key]}</span>
+                                        <div style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>{item.doctor}</div>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{item.is_multi_day ? 'Wielodniowe' : item.time} {item.location ? `• ${item.location}` : ''}</div>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '4px' }}>
+                                        <button className="action-icon-btn" onClick={() => openFormForEdit(item)} style={{ width: '28px', height: '28px' }}>
+                                            <span className="material-symbols-outlined" style={{ fontSize: '0.95rem' }}>edit</span>
+                                        </button>
+                                        <button className="action-icon-btn" onClick={() => handleDelete(item)} style={{ width: '28px', height: '28px', color: '#ef4444' }}>
+                                            <span className="material-symbols-outlined" style={{ fontSize: '0.95rem' }}>delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                        <button
+                            className="btn-app btn-primary btn-full"
+                            style={{ marginTop: '6px', fontSize: '0.8rem', padding: '8px' }}
+                            onClick={() => openFormForDate(selectedDayRawDate)}
+                        >
+                            + Dodaj wydarzenie na ten dzień
+                        </button>
+                    </div>
+                </section>
+            )}
+
             {/* FORMULARZ (DRAWER) */}
             <section className={`form-drawer ${isFormOpen ? 'open' : ''}`}>
                 <div className="glass-card form-card">
