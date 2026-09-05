@@ -252,6 +252,9 @@ export default function MainApp() {
             notes: item.notes || ''
         });
         setIsFormOpen(true);
+
+        // Automatyczne przewinięcie do góry strony
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const closeForm = () => {
