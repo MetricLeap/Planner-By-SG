@@ -262,8 +262,27 @@ export default function MainApp() {
     const handleDelete = async (item) => {
         if (!window.confirm('Czy na pewno chcesz usunąć to wydarzenie?')) return;
         const { error } = await supabase.from('visits').delete().eq('id', item.id);
-        if (error) alert('Nie udało się usunąć: ' + error.message);
-        else {
+        if (error) {
+            alert('Nie udało się usunąć: ' + error.message);
+        } else {
+            try {
+                await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'deleted',
+                        doctor: item.doctor,
+                        date: item.date,
+                        time: item.time,
+                        memberKey: memberNames[item.member_key],
+                        cost: item.cost
+                    })
+                });
+            } catch (mailErr) {
+                console.error('Błąd wysyłania maila o usunięciu:', mailErr);
+            }
+
+
             if (selectedDayVisits) setSelectedDayVisits(selectedDayVisits.filter(v => v.id !== item.id));
             fetchVisits();
         }
