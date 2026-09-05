@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import './styles.css';
+import '../app/globals.css';
 
 const memberNames = {
     mom: 'Nataliia',
