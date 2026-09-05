@@ -168,6 +168,22 @@ export default function MainApp() {
             if (editId) {
                 const { error } = await supabase.from('visits').update(payload).eq('id', editId);
                 if (error) throw error;
+
+                // WYŚLIJ MAIL: DODANIE
+                await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'created',
+                        doctor: payload.doctor,
+                        date: payload.date,
+                        time: payload.time,
+                        memberKey: memberNames[payload.member_key],
+                        location: payload.location,
+                        notes: payload.notes,
+                        cost: payload.cost // <-- dodane
+                    })
+                });
             } else {
                 const { error } = await supabase.from('visits').insert([payload]);
                 if (error) throw error;
@@ -181,7 +197,8 @@ export default function MainApp() {
                         time: payload.time,
                         memberKey: memberNames[payload.member_key],
                         location: payload.location,
-                        notes: payload.notes
+                        notes: payload.notes,
+                        cost: payload.cost
                     })
                 });
             }
