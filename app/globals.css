@@ -785,7 +785,7 @@ textarea:focus {
   }
 
   .mobile-bottom-nav {
-    display: flex;
+    display: flex !important;
     justify-content: space-around;
     align-items: center;
     position: fixed;
