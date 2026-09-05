@@ -48,7 +48,7 @@ export async function POST(request) {
                 htmlContent = `
                     <h2 style="color: #dc2626;">Usunięto wydarzenie</h2>
                     <p><strong>Wydarzenie:</strong> ${doctor}</p>
-                    <p><strong>Data:</strong> ${date} (${time})</p>
+                    <p><strong>Termin:</strong> ${date} (${time})</p>
                     <p><strong>Uczestnik:</strong> ${memberKey}</p>
                     <p><strong>Koszt:</strong> ${costFormatted}</p>
                     <p>To wydarzenie zostało usunięte z terminarza.</p>

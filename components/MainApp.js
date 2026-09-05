@@ -164,6 +164,11 @@ export default function MainApp() {
             notes: formData.notes || ''
         };
 
+        // Przygotowanie wartości daty do maila
+        const dateForEmail = isMultiDay
+            ? `${formData.startDate} do ${formData.endDate}`
+            : formData.date;
+
         try {
             if (editId) {
                 const { error } = await supabase.from('visits').update(payload).eq('id', editId);
@@ -176,7 +181,7 @@ export default function MainApp() {
                     body: JSON.stringify({
                         action: 'updated',
                         doctor: payload.doctor,
-                        date: payload.date,
+                        date: dateForEmail,
                         time: payload.time,
                         memberKey: memberNames[payload.member_key],
                         location: payload.location,
@@ -195,7 +200,7 @@ export default function MainApp() {
                     body: JSON.stringify({
                         action: 'created',
                         doctor: payload.doctor,
-                        date: payload.date,
+                        date: dateForEmail,
                         time: payload.time,
                         memberKey: memberNames[payload.member_key],
                         location: payload.location,
@@ -268,6 +273,8 @@ export default function MainApp() {
         if (error) {
             alert('Nie udało się usunąć: ' + error.message);
         } else {
+            const dateForEmail = item.is_multi_day ? `${item.date} do ${item.end_date}` : item.date;
+
             try {
                 await fetch('/api/send-email', {
                     method: 'POST',
@@ -275,7 +282,7 @@ export default function MainApp() {
                     body: JSON.stringify({
                         action: 'deleted',
                         doctor: item.doctor,
-                        date: item.date,
+                        date: dateForEmail,
                         time: item.time,
                         memberKey: memberNames[item.member_key],
                         cost: item.cost
