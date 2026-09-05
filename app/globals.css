@@ -706,7 +706,7 @@ textarea:focus {
 
 /* MOBILE BOTTOM NAVBAR */
 .mobile-bottom-nav {
-  display: none;
+  display: flex;
 }
 
 /* RESPONSIVE LAYOUT */
