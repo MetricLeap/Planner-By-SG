@@ -66,7 +66,7 @@ export async function POST(request) {
 
         const data = await resend.emails.send({
             from: 'Planner By SG <powiadomienia@plannerbysg.pl>', // Zmień na zweryfikowaną domenę, gdy będzie gotowa
-            to: ['s.gasior97@gmail.com'], // Adres, na który mają przychodzić powiadomienia
+            to: ['s.gasior97@gmail.com', 'natkatatsenko@gmail.com'], // Adres, na który mają przychodzić powiadomienia
             subject: subject,
             html: htmlContent,
         });
