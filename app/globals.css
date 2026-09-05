@@ -800,7 +800,7 @@ textarea:focus {
     -webkit-appearance: none;
     font-size: 16px !important;
     /* Zapobiega zoomowaniu na iOS i wymusza czytelność */
-    padding: 10px 12px;
+    /* padding: 10px 12px; */
     background-color: var(--surface);
   }
 
