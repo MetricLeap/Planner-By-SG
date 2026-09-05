@@ -368,51 +368,51 @@ export default function MainApp() {
             )}
 
             {/* FORMULARZ (DRAWER) */}
-            <section className={`form-drawer ${isFormOpen ? 'open' : ''}`} style={{ padding: '0' }}>
-                <div className="glass-card form-card" style={{ height: '100%', maxHeight: '100vh', overflowY: 'auto', borderRadius: '0', display: 'flex', flexDirection: 'column' }}>
-                    <div className="form-card-header" style={{ padding: '12px 16px' }}>
-                        <h3 style={{ fontSize: '1rem' }}>{editId ? 'Edytuj wydarzenie' : 'Zaplanuj wydarzenie'}</h3>
+            <section className={`form-drawer ${isFormOpen ? 'open' : ''}`}>
+                <div className="glass-card form-card">
+                    <div className="form-card-header">
+                        <h3>{editId ? 'Edytuj wydarzenie' : 'Zaplanuj wydarzenie'}</h3>
                         <button type="button" className="icon-btn-close" onClick={closeForm}>&times;</button>
                     </div>
-                    <form className="app-form" onSubmit={handleFormSubmit} style={{ padding: '12px 16px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                        <div className="form-grid" style={{ gap: '10px' }}>
+                    <form className="app-form" onSubmit={handleFormSubmit}>
+                        <div className="form-grid">
                             <div className="input-group">
-                                <label style={{ fontSize: '0.75rem' }}>Uczestnik</label>
+                                <label>Uczestnik</label>
                                 <select value={formData.memberKey} onChange={e => setFormData({ ...formData, memberKey: e.target.value })}>
                                     <option value="mom">Nataliia</option><option value="dad">Sebastian</option><option value="child1">Kamila</option><option value="child2">Emilia</option><option value="all">Wszyscy</option>
                                 </select>
                             </div>
                             <div className="input-group">
-                                <label style={{ fontSize: '0.75rem' }}>Nazwa wydarzenia</label>
+                                <label>Nazwa wydarzenia</label>
                                 <input type="text" required placeholder="np. Stomatolog" value={formData.doctor} onChange={e => setFormData({ ...formData, doctor: e.target.value })} />
                             </div>
                             <div className="input-group span-2 checkbox-group">
                                 <label className="switch-label"><input type="checkbox" checked={isMultiDay} onChange={e => setIsMultiDay(e.target.checked)} /><span>Wydarzenie wielodniowe</span></label>
                             </div>
                             {!isMultiDay ? (
-                                <div className="input-group span-2"><label style={{ fontSize: '0.75rem' }}>Data i godzina</label><input type="datetime-local" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} /></div>
+                                <div className="input-group span-2"><label>Data i godzina</label><input type="datetime-local" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} /></div>
                             ) : (
                                 <>
-                                    <div className="input-group"><label style={{ fontSize: '0.75rem' }}>Data początkowa</label><input type="date" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} /></div>
-                                    <div className="input-group"><label style={{ fontSize: '0.75rem' }}>Data końcowa</label><input type="date" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} /></div>
+                                    <div className="input-group"><label>Data początkowa</label><input type="date" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} /></div>
+                                    <div className="input-group"><label>Data końcowa</label><input type="date" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} /></div>
                                 </>
                             )}
                             <div className="input-group span-2">
-                                <label style={{ fontSize: '0.75rem' }}>Wybierz zapisane miejsce</label>
+                                <label>Wybierz zapisane miejsce</label>
                                 <select onChange={handleSelectPlaceChange} defaultValue="">
                                     <option value="">-- Wybierz z listy --</option>
                                     {savedPlaces.map(p => <option key={p.id} value={p.name}>{p.name} ({p.address})</option>)}
                                 </select>
                             </div>
-                            <div className="input-group span-2"><label style={{ fontSize: '0.75rem' }}>Miejsce i adres</label><input type="text" placeholder="np. ul. Przykładowa 1" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} /></div>
-                            <div className="input-group"><label style={{ fontSize: '0.75rem' }}>Telefon</label><input type="tel" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} /></div>
-                            <div className="input-group"><label style={{ fontSize: '0.75rem' }}>Koszt (zł)</label><input type="number" step="0.01" value={formData.cost} onChange={e => setFormData({ ...formData, cost: e.target.value })} /></div>
+                            <div className="input-group span-2"><label>Miejsce i adres</label><input type="text" placeholder="np. ul. Przykładowa 1" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} /></div>
+                            <div className="input-group"><label>Telefon</label><input type="tel" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} /></div>
+                            <div className="input-group"><label>Koszt (zł)</label><input type="number" step="0.01" value={formData.cost} onChange={e => setFormData({ ...formData, cost: e.target.value })} /></div>
                             <div className="input-group span-2">
-                                <label style={{ fontSize: '0.75rem' }}>Komentarz / Notatka</label>
-                                <textarea rows="3" placeholder="Dodatkowe informacje..." value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '10px', color: 'inherit', resize: 'vertical' }} />
+                                <label>Komentarz / Notatka</label>
+                                <textarea rows="3" placeholder="Dodatkowe informacje..." value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} />
                             </div>
                         </div>
-                        <div className="form-actions" style={{ marginTop: '15px' }}>
+                        <div className="form-actions">
                             <button type="submit" disabled={isSubmitting} className="btn-app btn-primary btn-full">{isSubmitting ? 'Zapisywanie...' : (editId ? 'Zapisz zmiany' : 'Dodaj wydarzenie')}</button>
                         </div>
                     </form>
