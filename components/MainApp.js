@@ -314,7 +314,10 @@ export default function MainApp() {
         <div className="app-shell" style={{ paddingBottom: '90px' }}>
             <header className="app-header">
                 <div className="header-brand">
-                    <div className="brand-logo"><span className="material-symbols-outlined">medical_services</span></div>
+                    <div className="brand-logo">
+                        {/* <span className="material-symbols-outlined">medical_services</span> */}
+                        <img src='../app/favicon.ico' alt='Logo - Planner By SG' />
+                    </div>
                     <div className="brand-text">
                         <h1>Planner by SG</h1>
                         <p>Nasz terminarz | Rodzina Gąsior</p>
